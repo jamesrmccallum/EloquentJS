@@ -1,4 +1,4 @@
-var ANCESTRY_FILE = "[\n  " + [
+ var ANCESTRY_FILE: string = "[\n  " + [
     '{"name": "Carolus Haverbeke", "sex": "m", "born": 1832, "died": 1905, "father": "Carel Haverbeke", "mother": "Maria van Brussel"}',
     '{"name": "Emma de Milliano", "sex": "f", "born": 1876, "died": 1956, "father": "Petrus de Milliano", "mother": "Sophia van Damme"}',
     '{"name": "Maria de Rycke", "sex": "f", "born": 1683, "died": 1724, "father": "Frederik de Rycke", "mother": "Laurentia van Vlaenderen"}',
@@ -39,103 +39,193 @@ var ANCESTRY_FILE = "[\n  " + [
     '{"name": "Maria Sturm", "sex": "f", "born": 1835, "died": 1917, "father": "Charles Sturm", "mother": "Seraphina Spelier"}',
     '{"name": "Jacobus Bernardus van Brussel", "sex": "m", "born": 1736, "died": 1809, "father": "Jan van Brussel", "mother": "Elisabeth Haverbeke"}'
 ].join(",\n  ") + "\n]";
-var Ancestor = (function () {
-    function Ancestor() {
-    }
-    return Ancestor;
-})();
-;
+
+class Ancestor {
+    name: string; 
+    sex: string;
+    born: number;
+    died: number;
+    father: string;
+    mother: string;    
+};
+
 function arrayToList(a) {
-    var ret = {};
-    for (var i = a.length - 1; i > 0; i--) {
-        ret = { value: a[i], rest: ret };
+    var ret ={};
+    for(var i = a.length-1; i > 0; i--) {
+        ret = {value: a[i], rest: ret}
     }
     return ret;
 }
+
 function listToArray(a) {
     var ret = [];
-    for (var node = a; node; node = node.rest) {
-        if (node.value !== undefined) {
-            ret.push(node.value);
-        }
+    for (var node = a; node; node = node.rest){
+      if (node.value !== undefined) {
+        ret.push(node.value);  
+      }
     }
-    return ret;
-}
-;
-function prepend(a, rest) {
-    var ret = { value: undefined, rest: undefined };
+    return ret;    
+};
+
+function prepend(a: Object,rest: Object):Object {     
+    var ret: Object = {value: undefined, rest: undefined};        
     ret["value"] = a;
     ret["rest"] = rest;
     return ret;
 }
+
 //OBJECT EQUALITY 
-function deepEqual(obj1, obj2) {
-    var chk = true;
-    Object.getOwnPropertyNames(obj1).forEach(function (val, idx, ary) {
-        if (typeof (obj1[val]) == 'object') {
-            if (!deepEqual(obj1[val], obj2[val])) {
+function deepEqual(obj1: Object,obj2: Object):boolean {
+    var chk: boolean = true;
+     
+    Object.getOwnPropertyNames(obj1).forEach( function(val, idx, ary) {
+        if(typeof(obj1[val]) == 'object') {  // if this is an object.. 
+            if(!deepEqual(obj1[val],obj2[val])) {
                 chk = false;
             }
-        }
-        else if (obj1[val] !== obj2[val]) {
-            chk = false;
-        }
-    });
-    return chk;
-}
-;
+        } else if (obj1[val] !== obj2[val])  {// if it's not..
+                chk = false;
+        } 
+    })
+    return chk; 
+};
+
 //FLATTEN AN ARRAY OF ARRAYS
 var arrays = [[1, 2, 3], [4, 5], [6]];
-function flattener(inArray) {
-    return inArray.reduce(function (a, b) { return a.concat(b); });
-}
-;
+
+function flattener(inArray:number[][]):number[]{
+    return inArray.reduce(function(a,b) { return a.concat(b)});  
+};
+
 console.log(flattener(arrays));
-var ancestry = JSON.parse(ANCESTRY_FILE);
+
+var ancestry: Ancestor[] = JSON.parse(ANCESTRY_FILE);
+
 // FIND AVERAGE MOTHER DAUGHTER AGES 
-function average(arr) {
-    function plus(a, b) { return a + b; }
-    return arr.reduce(plus) / arr.length;
-}
-;
-function averageMotherDaughterAgeDiff(array) {
-    var byName = {};
-    array.forEach(function (person) {
-        byName[person.name] = person;
+
+function average(arr: Array<number>): number {
+      function plus(a: number, b: number) { return a + b; }
+      return arr.reduce(plus) / arr.length;
+};
+    
+function averageMotherDaughterAgeDiff(array: Ancestor[]):number {
+
+    var byName: Object = {};
+    
+    array.forEach(function(person) {
+      byName[person.name] = person;
     });
-    var ages = [];
-    for (var i = 0; i < array.length; i++) {
-        var a = array[i];
-        if (a.mother !== "" && a.sex == "f" && byName[a.mother]) {
-            var mother = byName[a.mother];
-            var age = a.born - mother.born;
+    
+    var ages: Array<number> = []; 
+    
+    for(var i = 0; i < array.length; i++) {
+         var a: Ancestor = array[i];
+         if(a.mother !=="" && a.sex=="f" && byName[a.mother]) {
+            var mother: Ancestor= byName[a.mother];
+            var age: number = a.born - mother.born;
             ages.push(age);
-        }
+         }
     }
+    
     return average(ages);
-}
-;
+};
+
 console.log(averageMotherDaughterAgeDiff(ancestry));
-;
-function lifeExpectancy(array) {
-    var centuries = [];
-    var ret = [];
-    var ret = [];
-    var years = [];
-    array.forEach(function (n) {
-        var year = Math.ceil(n.died / 100);
-        var age = n.died - n.born;
-        //Keep track of unique years     
-        if (years.indexOf(year) == -1) {
-            years.push(year);
-            centuries.push({ century: year, ages: [] });
+
+class ageGroup{
+    century: number;
+    ancestors: Array<Ancestor>;
+    
+    constructor(century: number, ancestors: Array<Ancestor>){
+        this.century = century
+        this.ancestors = ancestors
+    }
+};
+
+class resultrow{century: number; average: number;}; 
+
+ function lifeExpectancy(array: Ancestor[]):any {
+    
+    function arrayFromObject(obj: Object): Array<ageGroup> {
+        var arr: Array<ageGroup> = [];
+        var a: ageGroup = new ageGroup(undefined,undefined);
+        for (var i in obj) {
+            var a: ageGroup = new ageGroup(i,obj[i]);
+            arr.push(a);
         }
-        centuries[year].ages.push(age);
+        return arr;
+    };
+    
+    function groupBy(list: Array<any>, fn: Function):Array<any> {
+        var groups: Object = {};
+        for (var i = 0; i < list.length; i++) {
+            var group: string = JSON.stringify(fn(list[i]));
+            if (group in groups) {
+                groups[group].push(list[i]);
+            } else {
+                groups[group] = [list[i]];
+            }
+        }
+        return arrayFromObject(groups);
+    };
+
+    var result: Array<ageGroup> = groupBy(ancestry, function(item) {
+        return [Math.ceil(item.died/100)];
     });
-    centuries.forEach(function (a) {
-        ret.push(a.century + ' ' + average(a.ages));
-    });
-    return ret;
+    
+    
+    // Go through the results array - compute averages, create new array of results
+    var ret: Array<resultrow> = [];
+    
+    result.forEach(function(a: ageGroup){
+        var r: resultrow = {century: undefined, average: undefined};
+        var b: number = 0;
+        r.century = a.century;
+        a.ancestors.forEach(function(x: Ancestor){
+            var p: number = x.died - x.born 
+            b+= p;
+        })
+        r.average = b/a.ancestors.length;
+        ret.push(r)
+    })
+    
+    return ret;   
+    
 }
+
 console.log(lifeExpectancy(ancestry));
+console.log("inspect");
+
+//-------------------------------EVERY AND THEN SOME 
+
+function every(a: Array<any>,f: Function):boolean{
+    var res: boolean = true; 
+    
+    a.forEach(function(a){
+        if(!f(a)) {
+            res = false; 
+        }
+    })
+    return res; 
+}
+
+function some(a: Array<any>, f: Function): boolean{
+    var res: boolean = false;
+    var i: number = 0; 
+    
+    while(!res && i < a.length) {
+        if(f(a[i])) {
+            res = true;
+        } else {
+            i ++;
+        }
+    } 
+    return res; 
+}
+
+console.log(every([NaN, NaN, NaN], isNaN));
+console.log(every([NaN, NaN, 4], isNaN));
+console.log(some([NaN, 3, 4], isNaN));
+console.log(some([2, 3, 4], isNaN));
+
 console.log("inspect");
