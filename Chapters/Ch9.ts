@@ -60,11 +60,7 @@ console.log(text.replace(new RegExp('\'(?=[A-Z])|(\'\\W|\\W\')|\'$','g'), functi
 //That is, .5 and 5. are valid JavaScript numbers, but a lone dot isn’t.
 
 // Fill in this regular expression.
-var number: RegExp = /^...$/;
-
-([+-]?\d+) // Get me some positive or negative 
-([\.]\d+|\d+[\.]) // Get me some decimals 
-((\d*.\d|\d*)?[Ee][+-]?\d+) // get me some exponents 
+var number: RegExp = new RegExp('[+-]?\\d?[\\.]?\\d?[Ee]?[+-]?\\d*');
 
 // Tests:
 ["1", "-1", "+15", "1.55", ".5", "5.", "1.3e2", "1E-4",
