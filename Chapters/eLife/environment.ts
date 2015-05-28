@@ -1,4 +1,7 @@
-//interface Action {type: string; direction: string;}
+///<reference path="creatures.ts"/>
+///<reference path="actionTypes.ts"/>
+
+interface Action {type: string; direction: string;}
 
 class World {
   public grid: Grid; public legend;
@@ -26,7 +29,7 @@ class World {
         this.letAct(critter, vector);
       }
     }, this);
-  };
+  }
   
   letAct(critter: creature, vector: Vector) {
     
@@ -39,46 +42,45 @@ class World {
         this.grid.set(dest, critter);
       }
     }
-  };
+  }
   
-  checkDestination(action, vector: Vector) {
+  checkDestination(action: Action, vector: Vector) {
     if (directions.hasOwnProperty(action.direction)) {
       var dest = vector.plus(directions[action.direction]);
       if (this.grid.isInside(dest))
         return dest;
     }
-  };
+  }
   
   toString() {
-    var output = "";
+    var output: string = "";
     for (var y = 0; y < this.grid.height; y++) {
       for (var x = 0; x < this.grid.width; x++) {
-        var element = this.grid.get(new Vector(x, y));
-        output += charFromElement(element);
+        var creature = this.grid.get(new Vector(x, y));
+        output += creature.originChar || null;
       }
       output += "\n";
     }
     return output;
-  };
+  }
 }
 
 class LifelikeWorld extends World {
   constructor(map, legend) {
-    super(map,legend)
+    super(map, legend)
   }
-  letAct(critter, vector: Vector) {
+  letAct(critter: creature, vector: Vector) {
     var action = critter.act(new View(this, vector));
     var handled = action &&
       action.type in actionTypes &&
-      actionTypes[action.type].call(this, critter,
-                                    vector, action);
+      actionTypes[action.type].call(this, critter,vector, action);
     if (!handled) {
       critter.energy -= 0.2;
       if (critter.energy <= 0)
         this.grid.set(vector, null);
     }
   }
-  
+
 };
 
 class Grid {
@@ -95,20 +97,20 @@ class Grid {
   }
   get(vector: Vector) {
     return this.space[vector.x + this.width * vector.y];
-  };
+  }
   set(vector: Vector, value: creature) {
     this.space[vector.x + this.width * vector.y] = value;
-  };
+  }
   
   forEach(f: Function, context) {
-  for (var y = 0; y < this.height; y++) {
-    for (var x = 0; x < this.width; x++) {
-      var value = this.space[x + y * this.width];
-      if (value != null)
-        f.call(context, value, new Vector(x, y));
+    for (var y = 0; y < this.height; y++) {
+      for (var x = 0; x < this.width; x++) {
+        var value = this.space[x + y * this.width];
+        if (value != null)
+          f.call(context, value, new Vector(x, y));
+      }
     }
   }
-};
 }
 
 class View {
@@ -120,22 +122,24 @@ class View {
   }
 
   look(dir: string) {
-    var target = this.vector.plus(directions[dir]);
+    var target: Vector = this.vector.plus(directions[dir]);
     if (this.world.grid.isInside(target))
-      return charFromElement(this.world.grid.get(target));
+      return this.world.grid.get(target).originChar;
     else
       return "#";
-  };
+  }
+  
   findAll(ch) {
     var found: Array<creature> = [];
     for (var dir in directions)
       if (this.look(dir) == ch)
         found.push(dir);
     return found;
-  };
+  }
+  
   find(ch) {
     var found = this.findAll(ch);
     if (found.length == 0) return null;
-    return randomElement(found);
-  };
+    return utilities.randomElement(found);
+  }
 }

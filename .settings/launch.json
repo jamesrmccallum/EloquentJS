@@ -32,7 +32,7 @@
 		{
 			"name": "testrandom",
 			"type": "node",
-			"program": "butt.js",
+			"program": "./Chapters/eLife/test.js",
 			"args": [],
 			"cwd": ".",
 			"runtimeExecutable": null,

@@ -1,3 +1,4 @@
+///<reference path="creatures.ts"/>
 
 var actionTypes: { [id: string] : Function; } = {};
 

@@ -1,30 +1,34 @@
 ///<reference path="environment.ts"/>
-///<reference path="utilities.ts"/>
+interface Creaturespec{ 
+  energy: number; 
+  direction: string; 
+  act(v:View):Action; 
+  preyseen?: Array<any>; 
+  originChar?: string
+};
 
-interface Creaturespec<T>{ energy: number; direction: string; act(): T; preyseen?: Array<any>; originChar: string};
-
-//var Creaturespecs: {[id: string]: new Creaturespec<T> } = {}
+var Creaturespecs: {[id: string]: Creaturespec } = {}
 
 class creature { 
-  private __act: Function;
+  public act: Function;
   public energy: number;
   public direction: string;
   public preyseen: Array<any>
   public originChar: string;
    
-  constructor(public spec: Creaturespec<T>, originChar: string) {
-    this.__act = spec.act; 
+  constructor(public spec: Creaturespec, originChar: string) {
+    this.act = spec.act;
+    this.energy = spec.energy;
+    this.direction = spec.direction;
+    this.originChar = originChar;
+    this.preyseen = spec.preyseen;
   }
-  
-  act(): T {
-    return this.__act;
-    }
 };
 
-function createCreature(legend:string, ch: string): creature {
+function createCreature(legend:Object, ch: string): creature {
   if (ch == " ")
     return null;
-  var s: Creaturespec = Creaturespecs[ch];
+  var s: Creaturespec = Creaturespecs[legend[ch]];
   var c: creature = new creature(s,ch)
   return c;
 }
@@ -41,7 +45,7 @@ Creaturespecs["PlantEater"] = {
   act: function(view: View) {
     var space = view.find(" ");
     if (this.energy > 60 && space)
-      return {type: "reproduce", direction: space};
+      return <Action>{type: "reproduce", direction: space};
     var plant = view.find("*");
     if (plant)
       return <Action>{type: "eat", direction: plant};
@@ -55,10 +59,10 @@ Creaturespecs["WallFollower"] = {
     direction: "s" , 
     act: function(view: View):Action {
       var start = this.direction;
-      if (view.look(dirPlus(this.direction, -3)) != " ")
-        start = this.direction = dirPlus(this.direction, -2);
+      if (view.look(utilities.dirPlus(this.direction, -3)) != " ")
+        start = this.direction = utilities.dirPlus(this.direction, -2);
       while (view.look(this.direction) != " ") {
-        this.direction = dirPlus(this.direction, 1);
+        this.direction = utilities.dirPlus(this.direction, 1);
         if (this.direction == start) break;
       }
       return <Action>{type: "move", direction: this.direction};
@@ -68,11 +72,11 @@ Creaturespecs["WallFollower"] = {
 
 Creaturespecs["BouncingCritter"] = {
   energy: 20, 
-  direction: randomElement(directionNames),
+  direction: utilities.randomElement(directionNames),
   act: function(view: View):Action {
     if (view.look(this.direction) != " ")
       this.direction = view.find(" ") || "s";
-      return {type: "move", direction: this.direction};
+      return <Action>{type: "move", direction: this.direction};
     }
 }
 
@@ -84,10 +88,10 @@ Creaturespecs["Plant"] = {
       if (this.energy > 15) {
         var space = view.find(" ");
         if (space)
-          return {type: "reproduce", direction: space};
+          return <Action>{type: "reproduce", direction: space};
       }
       if (this.energy < 20)
-        return {type: "grow", direction: null};
+        return <Action>{type: "grow", direction: null};
     }
 }
 
@@ -100,7 +104,7 @@ Creaturespecs["SmartPlantEater"] = {
         return {type: "reproduce", direction: space};
       var plants = view.findAll("*");
       if (plants.length > 1)
-        return {type: "eat", direction: randomElement(plants)};
+        return {type: "eat", direction: utilities.randomElement(plants)};
       if (view.look(this.direction) != " " && space)
         this.direction = space;
         return {type: "move", direction: this.direction};
@@ -122,7 +126,7 @@ Creaturespecs["Tiger"] = {
         this.preySeen.shift();
     
       if (prey.length && seenPerTurn > 0.25) // Only eat if the predator saw more than ¼ prey animal per turn
-        return {type: "eat", direction: randomElement(prey)};
+        return {type: "eat", direction: utilities.randomElement(prey)};
         
       var space = view.find(" ");
       if (this.energy > 400 && space)
