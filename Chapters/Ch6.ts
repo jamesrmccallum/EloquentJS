@@ -1,36 +1,6 @@
 
-class Vector{
-	x: number;
-	y: number; 
-	
-	constructor(x: number,y:number) {
-	this.x = x;
-	this.y = y;
-	}
-	
-	plus(v: Vector):Vector {
-		this.x += v.x;
-		this.y += v.y;
-		return this;
-	}
-	
-	minus(v: Vector):Vector {
-		this.x -= v.x;
-		this.y -= v.y;
-		return this;
-	}
-	
-	get length():number {
-		return Math.sqrt( (Math.pow(this.x,2) + Math.pow(this.y,2)) );
-	}
-}
 
-console.log(new Vector(1, 2).plus(new Vector(2, 3)));
-console.log(new Vector(1, 2).minus(new Vector(2, 3)));
-console.log(new Vector(3, 4).length);
-console.log("test");
-
-// IMPLEMENT A STRECHCELL INTERFACE
+// IMPLEMENT A STRETCHCELL INTERFACE
 
 function repeat(str: string, times: number):string {
   var result = "";

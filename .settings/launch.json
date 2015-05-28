@@ -28,6 +28,17 @@
 			"address": "localhost",
 			// Port to attach to.
 			"port": 5858
+		},
+		{
+			"name": "testrandom",
+			"type": "node",
+			"program": "butt.js",
+			"args": [],
+			"cwd": ".",
+			"runtimeExecutable": null,
+			"env": {}
 		}
 	]
+	
+	
 }
