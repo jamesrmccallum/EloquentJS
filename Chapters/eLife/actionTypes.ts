@@ -7,36 +7,32 @@ actionTypes["grow"] = function(critter: creature) {
   return true;
   }
   
-actionTypes["move"] = function(critter: creature, vector: Vector, action) {
-  var dest = this.checkDestination(action, vector);
-  if (dest == null ||
-      critter.energy <= 1 ||
-      this.grid.get(dest) != null)
+actionTypes["move"] = function(critter: creature, vector: Vector, action: Action) {
+  var dest: Vector = world.checkDestination(action, vector);
+  if (dest == null || critter.energy <= 1 ||world.grid.get(dest) != null)
     return false;
   critter.energy -= 1;
-  this.grid.set(vector, null);
-  this.grid.set(dest, critter);
+  world.grid.set(vector, null);
+  world.grid.set(dest, critter);
   return true;
-  }
+};
   
-actionTypes["eat"] = function(critter: creature, vector: Vector, action) {
-  var dest = this.checkDestination(action, vector);
-  var atDest = dest != null && this.grid.get(dest);
+actionTypes["eat"] = function(critter: creature, vector: Vector, action: Action) {
+  var dest: Vector = world.checkDestination(action, vector);
+  var atDest: creature = dest != null && world.grid.get(dest);
   if (!atDest || atDest.energy == null)
     return false;
   critter.energy += atDest.energy;
-  this.grid.set(dest, null);
+  world.grid.set(dest, null);
   return true;
 };
 
-actionTypes["reproduce"] = function(critter: creature, vector: Vector, action) {
-  var baby = createCreature(this.legend,critter.originChar); 
-  var dest = this.checkDestination(action, vector);
-  if (dest == null ||
-      critter.energy <= 2 * baby.energy ||
-      this.grid.get(dest) != null)
+actionTypes["reproduce"] = function(critter: creature, vector: Vector, action: Action) {
+  var baby: creature = createCreature(this.legend, critter.originChar); 
+  var dest: Vector = world.checkDestination(action, vector);
+  if (dest == null || critter.energy <= 2 * baby.energy || world.grid.get(dest) != null)
       return false;
   critter.energy -= 2 * baby.energy;
-  this.grid.set(dest, baby);
+  world.grid.set(dest, baby);
   return true;
 };

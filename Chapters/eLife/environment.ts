@@ -35,15 +35,17 @@ class World {
     
     var action: Action = critter.act(new View(this, vector));
     
-    if (action && action.type == "move") {
-      var dest: Vector = this.checkDestination(action, vector);
-      if (dest && this.grid.get(dest) == null) {
+    var handled = action &&
+      action.type in actionTypes &&
+      actionTypes[action.type].call(this, critter,vector, action);
+    if (!handled) {
+      critter.energy -= 0.2;
+      if (critter.energy <= 0)
         this.grid.set(vector, null);
-        this.grid.set(dest, critter);
-      }
     }
   }
   
+  //Is the requested direction inside the grid? 
   checkDestination(action: Action, vector: Vector) {
     if (directions.hasOwnProperty(action.direction)) {
       var dest = vector.plus(directions[action.direction]);
@@ -56,32 +58,14 @@ class World {
     var output: string = "";
     for (var y = 0; y < this.grid.height; y++) {
       for (var x = 0; x < this.grid.width; x++) {
-        var creature = this.grid.get(new Vector(x, y));
-        output += creature.originChar || null;
+        var s: string =  this.grid.get(new Vector(x,y)) == null ? ' ' : this.grid.get(new Vector(x, y)).originChar;
+        output += s;
       }
       output += "\n";
     }
     return output;
   }
 }
-
-class LifelikeWorld extends World {
-  constructor(map, legend) {
-    super(map, legend)
-  }
-  letAct(critter: creature, vector: Vector) {
-    var action = critter.act(new View(this, vector));
-    var handled = action &&
-      action.type in actionTypes &&
-      actionTypes[action.type].call(this, critter,vector, action);
-    if (!handled) {
-      critter.energy -= 0.2;
-      if (critter.energy <= 0)
-        this.grid.set(vector, null);
-    }
-  }
-
-};
 
 class Grid {
   public space: Array<creature>; public width: number; public height: number; 
@@ -95,8 +79,13 @@ class Grid {
   return vector.x >= 0 && vector.x < this.width &&
          vector.y >= 0 && vector.y < this.height;
   }
-  get(vector: Vector) {
-    return this.space[vector.x + this.width * vector.y];
+  get(vector: Vector): creature {
+    var v = this.space[vector.x + this.width * vector.y];
+    if (!v) {
+      return null;
+    } else {
+      return v;
+    }
   }
   set(vector: Vector, value: creature) {
     this.space[vector.x + this.width * vector.y] = value;
@@ -121,23 +110,24 @@ class View {
     this.vector = vector;
   }
 
-  look(dir: string) {
+  look(dir: string): creature {
     var target: Vector = this.vector.plus(directions[dir]);
-    if (this.world.grid.isInside(target))
-      return this.world.grid.get(target).originChar;
-    else
-      return "#";
+    if (this,world.grid.isInside(target))
+      return this.world.grid.get(target) == null ? null : this.world.grid.get(target);
   }
   
-  findAll(ch) {
+  findAll(ch: string) {
     var found: Array<creature> = [];
-    for (var dir in directions)
-      if (this.look(dir) == ch)
+    for (var dir in directions) {
+      var f: creature = this.look(dir);
+      if ((f==null ? ' ': f.originChar) == ch) {
         found.push(dir);
+      }
+    }
     return found;
   }
   
-  find(ch) {
+  find(ch: string) {
     var found = this.findAll(ch);
     if (found.length == 0) return null;
     return utilities.randomElement(found);

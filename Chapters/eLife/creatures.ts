@@ -3,7 +3,7 @@ interface Creaturespec{
   energy: number; 
   direction: string; 
   act(v:View):Action; 
-  preyseen?: Array<any>; 
+  preySeen?: Array<any>; 
   originChar?: string
 };
 
@@ -13,7 +13,7 @@ class creature {
   public act: Function;
   public energy: number;
   public direction: string;
-  public preyseen: Array<any>
+  public preySeen: Array<any>
   public originChar: string;
    
   constructor(public spec: Creaturespec, originChar: string) {
@@ -21,7 +21,7 @@ class creature {
     this.energy = spec.energy;
     this.direction = spec.direction;
     this.originChar = originChar;
-    this.preyseen = spec.preyseen;
+    this.preySeen = spec.preySeen;
   }
 };
 
@@ -59,9 +59,9 @@ Creaturespecs["WallFollower"] = {
     direction: "s" , 
     act: function(view: View):Action {
       var start = this.direction;
-      if (view.look(utilities.dirPlus(this.direction, -3)) != " ")
+      if (view.look(utilities.dirPlus(this.direction, -3)) != null)
         start = this.direction = utilities.dirPlus(this.direction, -2);
-      while (view.look(this.direction) != " ") {
+      while (view.look(this.direction) != null) {
         this.direction = utilities.dirPlus(this.direction, 1);
         if (this.direction == start) break;
       }
@@ -74,7 +74,7 @@ Creaturespecs["BouncingCritter"] = {
   energy: 20, 
   direction: utilities.randomElement(directionNames),
   act: function(view: View):Action {
-    if (view.look(this.direction) != " ")
+    if (view.look(this.direction) != null)
       this.direction = view.find(" ") || "s";
       return <Action>{type: "move", direction: this.direction};
     }
@@ -99,13 +99,13 @@ Creaturespecs["SmartPlantEater"] = {
     energy:30,
     direction:"e",
     act: function(view: View):Action {
-      var space = view.find(" ");
+      var space = view.find(" "); //Never find space???... 
       if (this.energy > 90 && space)
         return {type: "reproduce", direction: space};
       var plants = view.findAll("*");
       if (plants.length > 1)
         return {type: "eat", direction: utilities.randomElement(plants)};
-      if (view.look(this.direction) != " " && space)
+      if (view.look(this.direction) != null && space)
         this.direction = space;
         return {type: "move", direction: this.direction};
     }
@@ -114,6 +114,7 @@ Creaturespecs["SmartPlantEater"] = {
 Creaturespecs["Tiger"] = {
     energy:100 , 
     direction:"w" , 
+    preySeen: new Array(0),
     act:function(view: View):Action {
       // Average number of prey seen per turn
       var seenPerTurn: number = this.preySeen.reduce(function(a, b) {
@@ -128,12 +129,11 @@ Creaturespecs["Tiger"] = {
       if (prey.length && seenPerTurn > 0.25) // Only eat if the predator saw more than ¼ prey animal per turn
         return {type: "eat", direction: utilities.randomElement(prey)};
         
-      var space = view.find(" ");
+      var space = view.find(null);
       if (this.energy > 400 && space)
         return {type: "reproduce", direction: space};
-      if (view.look(this.direction) != " " && space)
+      if (view.look(this.direction) != null && space)
         this.direction = space;
         return {type: "move", direction: this.direction};
     },
-    preySeen: []
 }
