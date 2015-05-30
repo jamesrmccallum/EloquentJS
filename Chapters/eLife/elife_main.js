@@ -4,9 +4,9 @@ var Vector = (function () {
         this.y = y;
     }
     Vector.prototype.plus = function (v) {
-        this.x += v.x;
-        this.y += v.y;
-        return this;
+        var x = this.x + v.x;
+        var y = this.y + v.y;
+        return new Vector(x, y);
     };
     return Vector;
 })();
@@ -40,7 +40,7 @@ var directions = {
     "w": new Vector(-1, 0),
     "nw": new Vector(-1, -1)
 };
-var directionNames = "n ne e se s sw w nw".split(" ");
+var directionNames = Object.getOwnPropertyNames(directions);
 ///<reference path="creatures.ts"/>
 var actionTypes = {};
 actionTypes["grow"] = function (critter) {
@@ -298,7 +298,7 @@ Creaturespecs["Tiger"] = {
             this.preySeen.shift();
         if (prey.length && seenPerTurn > 0.25)
             return { type: "eat", direction: utilities.randomElement(prey) };
-        var space = view.find(null);
+        var space = view.find(" ");
         if (this.energy > 400 && space)
             return { type: "reproduce", direction: space };
         if (view.look(this.direction) != null && space)
@@ -312,21 +312,21 @@ Creaturespecs["Tiger"] = {
 ///<reference path="environment.ts"/>
 var plan = ["####################################################",
     "#                 ####         ****              ###",
-    "#   *  @  ##                 ########       OO    ##",
+    "#   *     ##                 ########       OO    ##",
     "#   *    ##        O O                 ****       *#",
-    "#       ##*                        ##########     *#",
+    "#       ##*       @                ##########     *#",
     "#      ##***  *         ****                     **#",
     "#* **  #  *  ***      #########                  **#",
     "#* **  #      *               #   *              **#",
     "#     ##              #   O   #  ***          ######",
-    "#*            @       #       #   *        O  #    #",
+    "#*                    #       #   *        O  #    #",
     "#*                    #  ######                 ** #",
     "###          ****          ***                  ** #",
     "#       O                        @         O       #",
     "#   *     ##  ##  ##  ##               ###      *  #",
     "#   **         #              *       #####  O     #",
     "##  **  O   O  #  #    ***  ***        ###      ** #",
-    "###               #   *****                    ****#",
+    "###      @        #   *****                    ****#",
     "####################################################"];
 var world = new World(plan, { "#": "Wall", "@": "Tiger", "O": "SmartPlantEater", "*": "Plant" });
 var active = null;

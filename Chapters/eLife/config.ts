@@ -6,10 +6,11 @@ class Vector {
 	  this.x = x;
 	  this.y = y;
   }
+  
   plus(v: Vector) {
-	  this.x += v.x
-    this.y += v.y 
-    return this;
+    var x: number = this.x + v.x
+    var y: number = this.y + v.y 
+    return new Vector(x,y);
   }
 }
 
@@ -43,4 +44,4 @@ var directions: Object = {
   "nw": new Vector(-1, -1)
 };
 
-var directionNames: Array<string> = "n ne e se s sw w nw".split(" ");
+var directionNames: Array<string> = Object.getOwnPropertyNames(directions);

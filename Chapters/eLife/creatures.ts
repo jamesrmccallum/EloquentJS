@@ -129,7 +129,7 @@ Creaturespecs["Tiger"] = {
       if (prey.length && seenPerTurn > 0.25) // Only eat if the predator saw more than ¼ prey animal per turn
         return {type: "eat", direction: utilities.randomElement(prey)};
         
-      var space = view.find(null);
+      var space = view.find(" ");
       if (this.energy > 400 && space)
         return {type: "reproduce", direction: space};
       if (view.look(this.direction) != null && space)
