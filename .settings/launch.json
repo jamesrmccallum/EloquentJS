@@ -32,7 +32,7 @@
 		{
 			"name": "testrandom",
 			"type": "node",
-			"program": "./Chapters/eLife/test.js",
+			"program": "./Chapters/CH11/run.js",
 			"args": [],
 			"cwd": ".",
 			"runtimeExecutable": null,
