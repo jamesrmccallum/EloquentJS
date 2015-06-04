@@ -1,3 +1,4 @@
+///<reference path="../Objects/Objects.ts"/>
 interface Mountain {
 	name: string;
 	height: number;
@@ -85,33 +86,62 @@ function moveCat() {
   requestAnimationFrame(animate);
 }
 
-function mousetrails(): void {
-  var trails: Array<SVGCircleElement> 
-  
-  for(var i = 0; i<10; i++) {
-    var s = new SVGCircleElement;
-    s.
+// Mouse Trails 
+
+var trails: Array<HTMLElement> = [];
+var colors: Array<string> = ["#00cbd0","#0082c1","#0900ff","#7c00ff","#e300ff"];
+var prevpos = new Vector(0,0);
+
+function drawCircles() {
+  var x: number = 0;
+  var y: number = 0;
+  for (var i = 0; i < colors.length; i++) {
+    var s: HTMLElement = document.createElement("div");
+    s.setAttribute("style","height:10px; padding: 0; margin: 0;");
+    s.style.width = "10px";
+    s.style.borderRadius = "5px";
+    s.style.top = x.toString();
+    s.className = "circle";
+    s.style.left = y.toString();
+    s.style.backgroundColor = colors[i];
+    document.body.appendChild(s)
+    trails.push(s);
+    x-=5;
+    y-=5;
   }
+};
+
+function mouseTrails(evt: MouseEvent) {
+  
+  var newpos = new Vector (evt.screenX, evt.screenY);
+  var xdiff: number = newpos.x - prevpos.x  
+  var ydiff: number = newpos.y - prevpos.y; 
+  var time: number = new Date().getTime(); 
+  
+  if(!trails.length) {drawCircles();}
+  
+  function moveTrails(time: number): void {
+    trails.forEach(function(a) {
+      a.style.top = (parseInt(a.style.top) + xdiff) + "px";
+      a.style.left = (parseInt(a.style.left) + ydiff) + "px";
+    })
+  }
+   
+  requestAnimationFrame(moveTrails);
+  prevpos = newpos; 
+ 
 }
 
+
+
+
+// MAIN 
 document.addEventListener("DOMContentLoaded", function(event: Event): void { 
-  
-  console.log(byTagName(document.body, "h1").length);
-  // → 1
-  console.log(byTagName(document.body, "span").length);
-  // → 3
-  var para = document.querySelector("p");
-  console.log(byTagName(para, "span").length);
-  
-  var field: Element = document.querySelector("input");
-  field.addEventListener("keydown", function(event: KeyboardEvent) {
-    if (event.keyCode == 81 || event.keyCode == 87 || event.keyCode == 88) {
-      event.preventDefault();
-    }
+ 
+  document.addEventListener("mousemove", function(evt: MouseEvent){
+    mouseTrails(evt);
   });
-  
-  //moveCat();
-  
+  //moveCat()
 });
 
 

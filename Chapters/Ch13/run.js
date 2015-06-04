@@ -1,3 +1,15 @@
+var Vector = (function () {
+    function Vector(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+    Vector.prototype.move = function (v) {
+        var x = this.x + v.x;
+        var y = this.y + v.y;
+        return new Vector(x, y);
+    };
+    return Vector;
+})();
 ///<reference path="../Objects/Objects.ts"/>
 ;
 var MOUNTAINS = [
@@ -72,59 +84,47 @@ function moveCat() {
 // Mouse Trails 
 var trails = [];
 var colors = ["#00cbd0", "#0082c1", "#0900ff", "#7c00ff", "#e300ff"];
-for (var i = 0; i < colors.length; i++) {
-    var c = new trailCircle(colors[i], 10, new Vector(10, 10));
-    trails.push(c);
-    document.body.appendChild(c.draw());
-}
-var trailCircle = (function () {
-    function trailCircle(color, radius, pos) {
-        this.posn.x = pos.x;
-        this.posn.y = pos.y;
-        this.color = color;
-        this.radius = radius;
-    }
-    trailCircle.prototype.draw = function () {
-        var s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        s.setAttribute("cx", this.posn.x.toString());
-        s.setAttribute("cy", this.posn.y.toString());
-        s.setAttribute("r", this.radius.toString());
-        s.setAttribute("style", "color:" + this.color + ";");
-        return s;
-    };
-    Object.defineProperty(trailCircle.prototype, "pos", {
-        get: function () {
-            return this.posn;
-        },
-        set: function (p) {
-            this.pos = p;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return trailCircle;
-})();
 var prevpos = new Vector(0, 0);
+function drawCircles() {
+    var x = 0;
+    var y = 0;
+    for (var i = 0; i < colors.length; i++) {
+        var s = document.createElement("div");
+        s.setAttribute("style", "height:10px; padding: 0; margin: 0;");
+        s.style.width = "10px";
+        s.style.borderRadius = "5px";
+        s.style.top = x.toString();
+        s.className = "circle";
+        s.style.left = y.toString();
+        s.style.backgroundColor = colors[i];
+        document.body.appendChild(s);
+        trails.push(s);
+        x -= 5;
+        y -= 5;
+    }
+}
+;
 function mouseTrails(evt) {
     var newpos = new Vector(evt.screenX, evt.screenY);
-    //If x is bigger we've moved right 
-    //If y is bigger we've moved up 
+    var xdiff = newpos.x - prevpos.x;
+    var ydiff = newpos.y - prevpos.y;
+    var time = new Date().getTime();
+    if (!trails.length) {
+        drawCircles();
+    }
+    function moveTrails(time) {
+        trails.forEach(function (a) {
+            a.style.top = (parseInt(a.style.top) + xdiff) + "px";
+            a.style.left = (parseInt(a.style.left) + ydiff) + "px";
+        });
+    }
+    requestAnimationFrame(moveTrails);
     prevpos = newpos;
 }
 // MAIN 
 document.addEventListener("DOMContentLoaded", function (event) {
-    console.log(byTagName(document.body, "h1").length);
-    // → 1
-    console.log(byTagName(document.body, "span").length);
-    // → 3
-    var para = document.querySelector("p");
-    console.log(byTagName(para, "span").length);
-    var field = document.querySelector("input");
-    field.addEventListener("keydown", function (event) {
-        if (event.keyCode == 81 || event.keyCode == 87 || event.keyCode == 88) {
-            event.preventDefault();
-        }
+    document.addEventListener("mousemove", function (evt) {
+        mouseTrails(evt);
     });
-    window.addEventListener("mousemove", mouseTrails);
-    //moveCat();
+    //moveCat()
 });
