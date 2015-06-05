@@ -11,10 +11,11 @@
 {
 	"version": "0.1.0",
 	"command": "tsc",
-	"windows": {"command": "tsc"},
+	"isShellCommand": true,
+	"windows": {
+		"command": "tsc"
+	},
 	"args": [],
-	"showOutput": "silent",
-	"isShellCommand": true, 
 	"problemMatcher": "$tsc"
 }
 

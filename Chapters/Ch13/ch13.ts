@@ -92,22 +92,22 @@ var trails: Array<HTMLElement> = [];
 var colors: Array<string> = ["#00cbd0","#0082c1","#0900ff","#7c00ff","#e300ff"];
 var prevpos = new Vector(0,0);
 
-function drawCircles() {
-  var x: number = 0;
-  var y: number = 0;
+function drawCircles(pos: Vector) {
+  var x: number = pos.x;
+  var y: number = pos.y;
   for (var i = 0; i < colors.length; i++) {
     var s: HTMLElement = document.createElement("div");
     s.setAttribute("style","height:10px; padding: 0; margin: 0;");
     s.style.width = "10px";
     s.style.borderRadius = "5px";
-    s.style.top = x.toString();
-    s.className = "circle";
-    s.style.left = y.toString();
+    s.style.top = x.toString() + "px";
+    s.style.left = y.toString() + "px";
+    s.className = "circle";  
     s.style.backgroundColor = colors[i];
     document.body.appendChild(s)
     trails.push(s);
-    x-=5;
-    y-=5;
+    x+=5;
+    y+=5;
   }
 };
 
@@ -118,7 +118,7 @@ function mouseTrails(evt: MouseEvent) {
   var ydiff: number = newpos.y - prevpos.y; 
   var time: number = new Date().getTime(); 
   
-  if(!trails.length) {drawCircles();}
+  if(!trails.length) {drawCircles(newpos);}
   
   function moveTrails(time: number): void {
     trails.forEach(function(a) {
@@ -131,9 +131,6 @@ function mouseTrails(evt: MouseEvent) {
   prevpos = newpos; 
  
 }
-
-
-
 
 // MAIN 
 document.addEventListener("DOMContentLoaded", function(event: Event): void { 

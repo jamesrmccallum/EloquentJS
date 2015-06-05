@@ -85,22 +85,22 @@ function moveCat() {
 var trails = [];
 var colors = ["#00cbd0", "#0082c1", "#0900ff", "#7c00ff", "#e300ff"];
 var prevpos = new Vector(0, 0);
-function drawCircles() {
-    var x = 0;
-    var y = 0;
+function drawCircles(pos) {
+    var x = pos.x;
+    var y = pos.y;
     for (var i = 0; i < colors.length; i++) {
         var s = document.createElement("div");
         s.setAttribute("style", "height:10px; padding: 0; margin: 0;");
         s.style.width = "10px";
         s.style.borderRadius = "5px";
-        s.style.top = x.toString();
+        s.style.top = x.toString() + "px";
+        s.style.left = y.toString() + "px";
         s.className = "circle";
-        s.style.left = y.toString();
         s.style.backgroundColor = colors[i];
         document.body.appendChild(s);
         trails.push(s);
-        x -= 5;
-        y -= 5;
+        x += 5;
+        y += 5;
     }
 }
 ;
@@ -110,7 +110,7 @@ function mouseTrails(evt) {
     var ydiff = newpos.y - prevpos.y;
     var time = new Date().getTime();
     if (!trails.length) {
-        drawCircles();
+        drawCircles(newpos);
     }
     function moveTrails(time) {
         trails.forEach(function (a) {
