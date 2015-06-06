@@ -88,57 +88,86 @@ function moveCat() {
 
 // Mouse Trails 
 
-var trails: Array<HTMLElement> = [];
+interface Trail {el: HTMLElement, offset: {x: number,y:number}};
+var trails: Array<Trail> = [];
 var colors: Array<string> = ["#00cbd0","#0082c1","#0900ff","#7c00ff","#e300ff"];
 var prevpos = new Vector(0,0);
 
-function drawCircles(pos: Vector) {
-  var x: number = pos.x;
-  var y: number = pos.y;
-  for (var i = 0; i < colors.length; i++) {
-    var s: HTMLElement = document.createElement("div");
-    s.setAttribute("style","height:10px; padding: 0; margin: 0;");
-    s.style.width = "10px";
-    s.style.borderRadius = "5px";
-    s.style.top = x.toString() + "px";
-    s.style.left = y.toString() + "px";
-    s.className = "circle";  
-    s.style.backgroundColor = colors[i];
-    document.body.appendChild(s)
-    trails.push(s);
-    x+=5;
-    y+=5;
-  }
-};
-
 function mouseTrails(evt: MouseEvent) {
   
-  var newpos = new Vector (evt.screenX, evt.screenY);
-  var xdiff: number = newpos.x - prevpos.x  
-  var ydiff: number = newpos.y - prevpos.y; 
+  var newpos = new Vector (evt.pageX, evt.pageY);
+  var xdiff: number = prevpos.x - newpos.x; 
+  var ydiff: number = prevpos.y - newpos.y; 
   var time: number = new Date().getTime(); 
+  var xdir: string = xdiff > 0 ? 'LEFT' : 'RIGHT';
+  var ydir: string = ydiff > 0 ? 'UP' : 'DOWN';
+  
+  console.log(xdir + " , " + ydir);
   
   if(!trails.length) {drawCircles(newpos);}
   
   function moveTrails(time: number): void {
     trails.forEach(function(a) {
-      a.style.top = (parseInt(a.style.top) + xdiff) + "px";
-      a.style.left = (parseInt(a.style.left) + ydiff) + "px";
+        a.el.style.top = (newpos.y + a.offset.y) + "px";
+        a.el.style.left = (newpos.x + a.offset.x) + "px";
     })
   }
-   
+ //console.log ("moved from" + prevpos.x +","+prevpos.y + " to " + newpos.x +","+newpos.y)
+ //console.log(xdiff + " " + ydiff);
   requestAnimationFrame(moveTrails);
   prevpos = newpos; 
- 
+
+  function drawCircles(pos: Vector) {
+    for (var i = 0; i < colors.length; i++) {
+      var s: HTMLElement = document.createElement("div");
+        s.style.top = pos.x.toString() + "px";
+        s.style.left = pos.y.toString() + "px";
+        s.className = "circle";
+        s.style.backgroundColor = colors[i];
+      document.body.appendChild(s)
+      var t: Trail = {el: s, offset: {x: pos.x,y: pos.y}}
+      trails.push(t);
+      pos.x -= 5;
+      pos.y += 5;
+    }
+  };
 }
 
+function asTabs(el: HTMLElement) {
+  var d: HTMLDivElement = document.createElement("div");
+  var tabs: Array<HTMLButtonElement> = [];
+  var activetab: string = "one";
+  d.className="tabs"
+  for(var i = 0; i < el.children.length; i++) {
+    var e: HTMLElement = <HTMLElement>el.children[i];
+    var s: string = e.attributes.getNamedItem("data-tabname").value;
+    var b: HTMLButtonElement = document.createElement("button");
+    b.innerText=s;
+    d.appendChild(b);
+    tabs.push(b);
+    if(s != activetab) {
+      e.style.display = "none";
+      e.classList.remove
+    }
+  }
+  
+  d.onclick = function(ev: MouseEvent){
+   var a = <HTMLElement>event.target 
+   
+   if(a.nodeName == "BUTTON") {
+     
+     activetab = a.innerText;
+     
+   }
+  }
+  el.insertBefore(d,document.getElementById("wrapper").firstChild);
+
+  
+}
 // MAIN 
 document.addEventListener("DOMContentLoaded", function(event: Event): void { 
  
-  document.addEventListener("mousemove", function(evt: MouseEvent){
-    mouseTrails(evt);
-  });
-  //moveCat()
+  asTabs(<HTMLElement>document.querySelector("#wrapper"));
 });
 
 

@@ -81,50 +81,69 @@ function moveCat() {
     }
     requestAnimationFrame(animate);
 }
-// Mouse Trails 
+;
 var trails = [];
 var colors = ["#00cbd0", "#0082c1", "#0900ff", "#7c00ff", "#e300ff"];
 var prevpos = new Vector(0, 0);
-function drawCircles(pos) {
-    var x = pos.x;
-    var y = pos.y;
-    for (var i = 0; i < colors.length; i++) {
-        var s = document.createElement("div");
-        s.setAttribute("style", "height:10px; padding: 0; margin: 0;");
-        s.style.width = "10px";
-        s.style.borderRadius = "5px";
-        s.style.top = x.toString() + "px";
-        s.style.left = y.toString() + "px";
-        s.className = "circle";
-        s.style.backgroundColor = colors[i];
-        document.body.appendChild(s);
-        trails.push(s);
-        x += 5;
-        y += 5;
-    }
-}
-;
 function mouseTrails(evt) {
-    var newpos = new Vector(evt.screenX, evt.screenY);
-    var xdiff = newpos.x - prevpos.x;
-    var ydiff = newpos.y - prevpos.y;
+    var newpos = new Vector(evt.pageX, evt.pageY);
+    var xdiff = prevpos.x - newpos.x;
+    var ydiff = prevpos.y - newpos.y;
     var time = new Date().getTime();
+    var xdir = xdiff > 0 ? 'LEFT' : 'RIGHT';
+    var ydir = ydiff > 0 ? 'UP' : 'DOWN';
+    console.log(xdir + " , " + ydir);
     if (!trails.length) {
         drawCircles(newpos);
     }
     function moveTrails(time) {
         trails.forEach(function (a) {
-            a.style.top = (parseInt(a.style.top) + xdiff) + "px";
-            a.style.left = (parseInt(a.style.left) + ydiff) + "px";
+            a.el.style.top = (newpos.y + a.offset.y) + "px";
+            a.el.style.left = (newpos.x + a.offset.x) + "px";
         });
     }
+    //console.log ("moved from" + prevpos.x +","+prevpos.y + " to " + newpos.x +","+newpos.y)
+    //console.log(xdiff + " " + ydiff);
     requestAnimationFrame(moveTrails);
     prevpos = newpos;
+    function drawCircles(pos) {
+        for (var i = 0; i < colors.length; i++) {
+            var s = document.createElement("div");
+            s.style.top = pos.x.toString() + "px";
+            s.style.left = pos.y.toString() + "px";
+            s.className = "circle";
+            s.style.backgroundColor = colors[i];
+            document.body.appendChild(s);
+            var t = { el: s, offset: { x: pos.x, y: pos.y } };
+            trails.push(t);
+            pos.x -= 5;
+            pos.y += 5;
+        }
+    }
+    ;
+}
+function asTabs(el) {
+    var d = document.createElement("div");
+    var activetab = "one";
+    d.className = "tabs";
+    for (var i = 0; i < el.children.length; i++) {
+        var e = el.children[i];
+        var s = e.attributes.getNamedItem("data-tabname").value;
+        var b = document.createElement("button");
+        b.innerText = s;
+        d.appendChild(b);
+        if (s != activetab) {
+            e.style.visibility = 'hidden';
+        }
+    }
+    d.onclick = function (ev) {
+        var a = event.target;
+        if (a.nodeName == "BUTTON") {
+        }
+    };
+    el.insertBefore(d, document.getElementById("wrapper").firstChild);
 }
 // MAIN 
 document.addEventListener("DOMContentLoaded", function (event) {
-    document.addEventListener("mousemove", function (evt) {
-        mouseTrails(evt);
-    });
-    //moveCat()
+    asTabs(document.querySelector("#wrapper"));
 });
