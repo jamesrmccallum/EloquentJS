@@ -133,33 +133,33 @@ function mouseTrails(evt: MouseEvent) {
   };
 }
 
+/// TABBED DISPLAY 
 function asTabs(el: HTMLElement) {
   var d: HTMLDivElement = document.createElement("div");
-  var tabs: Array<HTMLButtonElement> = [];
+  var tabs: {[name: string] : HTMLElement;} = {};
   var activetab: string = "one";
-  d.className="tabs"
+  d.className="tabs";
   for(var i = 0; i < el.children.length; i++) {
     var e: HTMLElement = <HTMLElement>el.children[i];
     var s: string = e.attributes.getNamedItem("data-tabname").value;
     var b: HTMLButtonElement = document.createElement("button");
     b.innerText=s;
     d.appendChild(b);
-    tabs.push(b);
+    tabs[s] = e;
     if(s != activetab) {
       e.style.display = "none";
-      e.classList.remove
     }
   }
   
   d.onclick = function(ev: MouseEvent){
-   var a = <HTMLElement>event.target 
-   
-   if(a.nodeName == "BUTTON") {
-     
-     activetab = a.innerText;
-     
+   var a = <HTMLElement>event.target; 
+   if(a.nodeName == "BUTTON" && a.innerText != activetab) {
+     tabs[activetab].style.display = "none"
+       activetab = a.innerText;
+       tabs[activetab].style.display = "block";
+     }
    }
-  }
+  
   el.insertBefore(d,document.getElementById("wrapper").firstChild);
 
   

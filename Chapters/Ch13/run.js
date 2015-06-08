@@ -122,8 +122,10 @@ function mouseTrails(evt) {
     }
     ;
 }
+/// TABBED DISPLAY 
 function asTabs(el) {
     var d = document.createElement("div");
+    var tabs = {};
     var activetab = "one";
     d.className = "tabs";
     for (var i = 0; i < el.children.length; i++) {
@@ -132,13 +134,17 @@ function asTabs(el) {
         var b = document.createElement("button");
         b.innerText = s;
         d.appendChild(b);
+        tabs[s] = e;
         if (s != activetab) {
-            e.style.visibility = 'hidden';
+            e.style.display = "none";
         }
     }
     d.onclick = function (ev) {
         var a = event.target;
-        if (a.nodeName == "BUTTON") {
+        if (a.nodeName == "BUTTON" && a.innerText != activetab) {
+            tabs[activetab].style.display = "none";
+            activetab = a.innerText;
+            tabs[activetab].style.display = "block";
         }
     };
     el.insertBefore(d, document.getElementById("wrapper").firstChild);
