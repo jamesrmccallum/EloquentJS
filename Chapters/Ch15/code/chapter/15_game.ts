@@ -38,7 +38,7 @@ var jumpSpeed = 17;
 
 interface IArrowCodes {[id: number]: string}; 
 
-var arrowCodes: IArrowCodes = {37: "left", 38: "up", 39: "right"};
+var arrowCodes: IArrowCodes = {37: "left", 38: "up", 39: "right",27: "esc"};
 
 interface IKeysPressed {[id: string]: boolean}; 
 
@@ -73,17 +73,20 @@ function runAnimation(frameFunc: Function) {
 }
 
 var arrows: IKeysPressed = trackKeys(arrowCodes);
+var pause: boolean = false;
 
 function runLevel(level: Level, andThen: Function) {
   var display = new DOMDisplay(document.body, level);
-  runAnimation(function(step) {
-    level.animate(step, arrows);
-    display.drawFrame(step);
-    if (level.isFinished()) {
-      display.clear();
-      if (andThen)
-        andThen(level.status);
-      return false;
+  runAnimation(function(step: number) {
+    if (arrows["esc"]) {pause = !pause}
+      if(!pause) {
+      level.animate(step, arrows);
+      display.drawFrame(step);
+      if (level.isFinished()) {
+        display.clear();
+        if (andThen) { andThen(level.status); }
+        return false;
+      }
     }
   });
 }
@@ -91,10 +94,10 @@ function runLevel(level: Level, andThen: Function) {
 function runGame(plans: Array<Array<string>>) {
 
   function startLevel(n: number) {
-    if (lives == 0) {
-      startLevel(0)
-    } else {
-      runLevel(new Level(plans[n]), function(status) {
+
+    runLevel(new Level(plans[n]), function(status: string) {
+
+      if (lives > 0) {
         if (status == "lost") {
           lives -= 1;
           startLevel(n);
@@ -103,8 +106,11 @@ function runGame(plans: Array<Array<string>>) {
           startLevel(n + 1);
         else
           console.log("You win!");
-      });
-    }
+      } else {
+        startLevel(0);
+      }
+    });
   }
+
   startLevel(0);
 }

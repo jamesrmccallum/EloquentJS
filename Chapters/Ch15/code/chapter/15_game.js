@@ -316,7 +316,7 @@ var playerXSpeed = 7;
 var gravity = 30;
 var jumpSpeed = 17;
 ;
-var arrowCodes = { 37: "left", 38: "up", 39: "right" };
+var arrowCodes = { 37: "left", 38: "up", 39: "right", 27: "esc" };
 ;
 function trackKeys(codes) {
     var pressed = {};
@@ -346,26 +346,30 @@ function runAnimation(frameFunc) {
     requestAnimationFrame(frame);
 }
 var arrows = trackKeys(arrowCodes);
+var pause = false;
 function runLevel(level, andThen) {
     var display = new DOMDisplay(document.body, level);
     runAnimation(function (step) {
-        level.animate(step, arrows);
-        display.drawFrame(step);
-        if (level.isFinished()) {
-            display.clear();
-            if (andThen)
-                andThen(level.status);
-            return false;
+        if (arrows["esc"]) {
+            pause = !pause;
+        }
+        if (!pause) {
+            level.animate(step, arrows);
+            display.drawFrame(step);
+            if (level.isFinished()) {
+                display.clear();
+                if (andThen) {
+                    andThen(level.status);
+                }
+                return false;
+            }
         }
     });
 }
 function runGame(plans) {
     function startLevel(n) {
-        if (lives == 0) {
-            startLevel(0);
-        }
-        else {
-            runLevel(new Level(plans[n]), function (status) {
+        runLevel(new Level(plans[n]), function (status) {
+            if (lives > 0) {
                 if (status == "lost") {
                     lives -= 1;
                     startLevel(n);
@@ -374,8 +378,11 @@ function runGame(plans) {
                     startLevel(n + 1);
                 else
                     console.log("You win!");
-            });
-        }
+            }
+            else {
+                startLevel(0);
+            }
+        });
     }
     startLevel(0);
 }
