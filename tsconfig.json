@@ -2,9 +2,9 @@
 	"compilerOptions": {
 		"module" : "amd",
 		"target" : "ES5",
-		"out": "./Chapters/Ch13/run.js"
+		"out": "./Chapters/Ch15/code/chapter/15_game.js"
 	},
 	"files": [
-		"./Chapters/Ch13/ch13.ts"
+		"./Chapters/Ch15/code/chapter/15_game.ts"
 	]
 }
