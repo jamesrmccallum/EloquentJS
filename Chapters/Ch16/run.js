@@ -27,7 +27,7 @@ var results = [
     { name: "Unsatisfied", count: 510, color: "pink" },
     { name: "No comment", count: 175, color: "silver" }
 ];
-var startpos = new Vector(50, 50);
+var startpos = new Vector(200, 200);
 function flipHorizontally(context, around) {
     context.translate(around, 0);
     context.scale(-1, 1);
@@ -83,22 +83,64 @@ function branch(length, angle, scale) {
     branch(length * scale, angle, scale);
     cx.restore();
 }
-function spiral(radius, center) {
-    var step = (2 * Math.PI) / 100;
-    var x = center.x;
-    var y = center.y;
+function spiral(a, b, center) {
+    var bound = (2 * Math.PI);
+    var step = bound / 100;
+    var angle = 0;
+    var y;
+    var x;
+    var cnt = 0;
     cx.beginPath();
     cx.moveTo(center.x, center.y);
-    for (var i = 0; i < 100; i++) {
-        x = Math.sin(i * x);
-        x = Math.cos(i * y);
+    for (var i = 0; i < bound; i += step) {
+        angle = 5 * i;
+        x = center.x + (a + b * angle) * Math.cos(angle);
+        y = center.x + (a + b * angle) * Math.sin(angle);
         cx.lineTo(x, y);
+        cnt++;
     }
     cx.stroke();
     cx.closePath();
+    console.log(cnt);
+}
+function star(radius, center, points) {
+    var radius = 40;
+    var sliceangle = (2 * Math.PI) / points;
+    var angle = sliceangle;
+    cx.beginPath();
+    cx.moveTo(x + radius, y);
+    for (var i = 1; i <= points; i++) {
+        var angle = sliceangle * i;
+        var x = center.x + (radius * Math.cos(angle));
+        var y = center.y + (radius * Math.sin(angle));
+        cx.quadraticCurveTo(center.x, center.y, x, y);
+    }
+    cx.stroke();
+    cx.fillStyle = "yellow";
+    cx.fill();
+}
+function pieChart(center, radius) {
+    var total = results.reduce(function (sum, choice) { return sum + choice.count; }, 0);
+    var currentAngle = -0.5 * Math.PI;
+    results.forEach(function (result) {
+        var sliceAngle = (result.count / total) * 2 * Math.PI;
+        var label = result.name + ':' + result.count;
+        var textAngle = currentAngle + (sliceAngle / 2);
+        var textx = center.x + (radius + 10) * Math.cos(textAngle);
+        var texty = center.y + (radius + 10) * Math.sin(textAngle);
+        console.log(textAngle + ' ' + label);
+        cx.beginPath();
+        cx.arc(center.x, center.y, radius, currentAngle, currentAngle + sliceAngle);
+        currentAngle += sliceAngle;
+        cx.lineTo(center.x, center.y);
+        cx.textAlign = textAngle > 1.8 ? "right" : "left";
+        cx.fillStyle = result.color;
+        cx.fillText(label, textx, texty);
+        cx.fill();
+    });
 }
 function run() {
-    spiral(30, startpos);
+    pieChart(startpos, 90);
 }
 function mouseTrack(evt) {
     var x = evt.x;

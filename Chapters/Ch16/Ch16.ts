@@ -12,7 +12,7 @@ var results: Array<IResult> = [
   {name: "No comment", count: 175, color: "silver"}
 ];
 
-var startpos = new Vector(50,50)
+var startpos = new Vector(200,200)
 
 function flipHorizontally(context:CanvasRenderingContext2D, around: number) {
   context.translate(around, 0);
@@ -76,29 +76,78 @@ function branch(length: number, angle: number, scale: number): void {
       cx.restore();
 }
 
-function spiral(radius: number, center: Vector) {  
-  var step: number = (2*Math.PI)/100;
-  var x: number = center.x;
-  var y: number = center.y; 
+function spiral(a: number, b: number, center: Vector) {
+  
+  var bound: number = (2* Math.PI);
+  var step: number = bound / 100;
+  var angle: number = 0; 
+  var y: number; 
+  var x: number;
+  var cnt: number = 0;
+  
   cx.beginPath()
-  cx.moveTo(center.x,center.y)
-  for(var i =0; i<100; i++) {
-    x = Math.sin(i*x);
-    x = Math.cos(i*y); 
-    cx.lineTo(x,y);
+  cx.moveTo(center.x, center.y)
+  
+  for (var i = 0; i < bound; i+=step) {
+    angle = 5 * i 
+    x = center.x + (a + b * angle) * Math.cos(angle)
+    y = center.x + (a + b * angle) * Math.sin(angle)
+    cx.lineTo(x, y);
+    cnt ++; 
   }
+  
   cx.stroke();
-  cx.closePath(); 
+  cx.closePath();
+  console.log(cnt)
+}
+
+function star(radius: number, center: Vector, points: number) {
+  var radius: number = 40;
+  var sliceangle = (2 * Math.PI) / points;
+  var angle: number = sliceangle;
+  cx.beginPath();
+  cx.moveTo(x + radius, y);
+
+  for (var i = 1; i <= points; i++) {
+    var angle: number = sliceangle * i;
+    var x: number = center.x + (radius * Math.cos(angle));
+    var y: number = center.y + (radius * Math.sin(angle));
+    cx.quadraticCurveTo(center.x, center.y, x, y)
+  }
+  cx.stroke()
+  cx.fillStyle = "yellow";
+  cx.fill();
 }
   
+function pieChart(center: Vector, radius: number) {
+  var total: number = results.reduce((sum, choice) => sum + choice.count, 0);
+  var currentAngle: number = -0.5 * Math.PI;
+
+  results.forEach(function(result: IResult) {
+    var sliceAngle = (result.count / total) * 2 * Math.PI;
+    var label: string = result.name + ':' + result.count;
+    var textAngle: number = currentAngle +(sliceAngle/2);
+    var textx: number = center.x + (radius + 10) * Math.cos(textAngle);
+    var texty: number = center.y + (radius + 10) * Math.sin(textAngle);
+    console.log(textAngle +' '+label)
+    cx.beginPath();
+    cx.arc(center.x, center.y, radius, currentAngle, currentAngle + sliceAngle);
+    currentAngle += sliceAngle;
+    cx.lineTo(center.x, center.y);
+    cx.textAlign = textAngle > 1.8 ? "right" : "left";
+    cx.fillStyle = result.color;
+    cx.fillText(label, textx, texty);
+    cx.fill();
+  });
+}
+
 function run(): void {
-  spiral(30,startpos);
+  pieChart(startpos,90)
 }
 
 function mouseTrack(evt: MouseEvent) {
-  
-  var x = evt.x;
-  var y = evt.y;
+  var x: number = evt.x;
+  var y: number = evt.y;
 
   x -= canvas.offsetLeft;
   y -= canvas.offsetTop;
