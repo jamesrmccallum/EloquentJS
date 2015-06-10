@@ -12,7 +12,7 @@ var results: Array<IResult> = [
   {name: "No comment", count: 175, color: "silver"}
 ];
 
-var startpos = new Vector(100,100)
+var startpos = new Vector(50,50)
 
 function flipHorizontally(context:CanvasRenderingContext2D, around: number) {
   context.translate(around, 0);
@@ -36,10 +36,32 @@ function trapezoid(height: number, bottomWidth: number, topwidth: number,start: 
 function redDiamond(height: number, width: number, start: Vector) {
   var x = start.x, y=start.y; 
   cx.save()
+  cx.translate(x,y);
   cx.rotate((Math.PI/180)*45);
   cx.fillStyle ="red"; 
-  cx.fillRect(x,y,width,height);
+  cx.fillRect(0,0,width,height);
   cx.restore();
+}
+
+function zigZag(lines: number, start: Vector, width:number, height: number) {
+  var stepHeight: number = height/lines;
+  var x = start.x,y=start.y 
+  
+  function isEven(n: number): boolean {
+    return!(n % 2); 
+  }
+  
+  cx.beginPath();
+  cx.moveTo(x,y); 
+  //Move right, then move left 
+  for (var i= 0; i<lines; i++) {
+
+      x = isEven(i)?start.x : x+=width;  // X is either on left or right 
+      cx.lineTo(x,y);
+      y+=stepHeight
+  }  
+  cx.stroke();
+  cx.closePath();
 }
 
 function branch(length: number, angle: number, scale: number): void {
@@ -53,9 +75,24 @@ function branch(length: number, angle: number, scale: number): void {
       branch(length * scale, angle, scale);
       cx.restore();
 }
+
+function spiral(radius: number, center: Vector) {  
+  var step: number = (2*Math.PI)/100;
+  var x: number = center.x;
+  var y: number = center.y; 
+  cx.beginPath()
+  cx.moveTo(center.x,center.y)
+  for(var i =0; i<100; i++) {
+    x = Math.sin(i*x);
+    x = Math.cos(i*y); 
+    cx.lineTo(x,y);
+  }
+  cx.stroke();
+  cx.closePath(); 
+}
   
-function run() {
-  redDiamond(30,30,startpos)
+function run(): void {
+  spiral(30,startpos);
 }
 
 function mouseTrack(evt: MouseEvent) {
