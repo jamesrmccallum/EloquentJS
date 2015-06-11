@@ -1,4 +1,5 @@
 ///<reference path="../Objects/Objects.ts"/>
+///<reference path="./bouncingBall.ts"/>
 var canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector("canvas");
 var cx: CanvasRenderingContext2D = <CanvasRenderingContext2D>canvas.getContext("2d");
 var counterDiv: HTMLDivElement = <HTMLDivElement>document.querySelector('#counter');
@@ -65,15 +66,15 @@ function zigZag(lines: number, start: Vector, width:number, height: number) {
 }
 
 function branch(length: number, angle: number, scale: number): void {
-      cx.fillRect(0, 0, 1, length);
-      if (length < 8) return;
-      cx.save();
-      cx.translate(0, length);
-      cx.rotate(-angle);
-      branch(length * scale, angle, scale);
-      cx.rotate(2 * angle);
-      branch(length * scale, angle, scale);
-      cx.restore();
+  cx.fillRect(0, 0, 1, length);
+  if (length < 8) return;
+  cx.save();
+  cx.translate(0, length);
+  cx.rotate(-angle);
+  branch(length * scale, angle, scale);
+  cx.rotate(2 * angle);
+  branch(length * scale, angle, scale);
+  cx.restore();
 }
 
 function spiral(a: number, b: number, center: Vector) {
@@ -126,10 +127,10 @@ function pieChart(center: Vector, radius: number) {
   results.forEach(function(result: IResult) {
     var sliceAngle = (result.count / total) * 2 * Math.PI;
     var label: string = result.name + ':' + result.count;
-    var textAngle: number = currentAngle +(sliceAngle/2);
+    var textAngle: number = currentAngle + (sliceAngle / 2);
     var textx: number = center.x + (radius + 10) * Math.cos(textAngle);
     var texty: number = center.y + (radius + 10) * Math.sin(textAngle);
-    console.log(textAngle +' '+label)
+
     cx.beginPath();
     cx.arc(center.x, center.y, radius, currentAngle, currentAngle + sliceAngle);
     currentAngle += sliceAngle;
@@ -141,9 +142,7 @@ function pieChart(center: Vector, radius: number) {
   });
 }
 
-function run(): void {
-  pieChart(startpos,90)
-}
+
 
 function mouseTrack(evt: MouseEvent) {
   var x: number = evt.x;
@@ -164,4 +163,4 @@ document.addEventListener("mousemove",function(evt: MouseEvent){
   }
 });
 
-run()
+bouncingBall(cx); 

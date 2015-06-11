@@ -17,6 +17,68 @@ var Vector = (function () {
     return Vector;
 })();
 ///<reference path="../Objects/Objects.ts"/>
+var Ball = (function () {
+    function Ball(pos, context, radius) {
+        this._pos = pos;
+        this.xbound = context.canvas.width;
+        this.ybound = context.canvas.height;
+        this.context = context;
+        this.radius = radius;
+    }
+    Object.defineProperty(Ball.prototype, "pos", {
+        get: function () {
+            return this._pos;
+        },
+        set: function (pos) {
+            this._pos = pos;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Ball.prototype.move = function () {
+        this.pos.plus();
+    };
+    Ball.prototype.draw = function () {
+        this.context.beginPath();
+        this.context.arc(this._pos.x, this._pos.y, this.radius, 0, 2 * Math.PI);
+        this.context.fillStyle = 'red';
+        this.context.fill();
+        this.context.stroke();
+        this.context.closePath();
+        this.context.restore();
+    };
+    return Ball;
+})();
+function bouncingBall(cx) {
+    var boxPos = new Vector(10, 10);
+    var ballPos = new Vector(80, 80);
+    var lastTime = null;
+    var ball = new Ball(ballPos, cx, 20);
+    function frame(time) {
+        if (lastTime != null)
+            updateAnimation(Math.min(100, time - lastTime) / 1000);
+        lastTime = time;
+        requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    function updateAnimation(step) {
+        cx.save();
+        cx.clearRect(boxPos.x, boxPos.y, 300, 300);
+        cx.beginPath();
+        cx.rect(boxPos.x, boxPos.y, 300, 300);
+        cx.stroke();
+        cx.closePath();
+        ball.move();
+        ball.draw();
+    }
+    function move(from) {
+        var x = Math.round(Math.random());
+        var y = Math.round(Math.random());
+        return from.plus(new Vector(x, y));
+    }
+}
+///<reference path="../Objects/Objects.ts"/>
+///<reference path="./bouncingBall.ts"/>
 var canvas = document.querySelector("canvas");
 var cx = canvas.getContext("2d");
 var counterDiv = document.querySelector('#counter');
@@ -128,7 +190,6 @@ function pieChart(center, radius) {
         var textAngle = currentAngle + (sliceAngle / 2);
         var textx = center.x + (radius + 10) * Math.cos(textAngle);
         var texty = center.y + (radius + 10) * Math.sin(textAngle);
-        console.log(textAngle + ' ' + label);
         cx.beginPath();
         cx.arc(center.x, center.y, radius, currentAngle, currentAngle + sliceAngle);
         currentAngle += sliceAngle;
@@ -138,9 +199,6 @@ function pieChart(center, radius) {
         cx.fillText(label, textx, texty);
         cx.fill();
     });
-}
-function run() {
-    pieChart(startpos, 90);
 }
 function mouseTrack(evt) {
     var x = evt.x;
@@ -157,4 +215,4 @@ document.addEventListener("mousemove", function (evt) {
         setTimeout(function () { throttled = false; });
     }
 });
-run();
+bouncingBall(cx);
