@@ -98,7 +98,6 @@ class Lava implements IActor {
 	};
 }
 
-
 class Coin implements IActor {
 
 	public pos: Vector;

@@ -1,10 +1,10 @@
 {
 	"compilerOptions": {
 		"module" : "amd",
-		"target" : "ES5",
-		"out": "./Chapters/Ch16/run.js"
+		"target" : "ES6",
+		"out": "./Chapters/Ch17/run.js"
 	},
 	"files": [
-		"./Chapters/Ch16/Ch16.ts"
+		"./Chapters/Ch17/test.ts"
 	]
 }

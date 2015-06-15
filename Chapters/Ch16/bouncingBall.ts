@@ -6,13 +6,17 @@ class Ball {
   private ybound: number;
   private context: CanvasRenderingContext2D;
   private radius: number;
-
-  constructor(pos: Vector, context: CanvasRenderingContext2D, radius: number) {
+  private containerpos: Vector;
+  private bearing: Vector; 
+  
+  constructor(pos: Vector, context: CanvasRenderingContext2D, radius: number,containerpos: Vector, containerWidth: number, containerHeight: number ) {
     this._pos = pos;
-    this.xbound = context.canvas.width;
-    this.ybound = context.canvas.height;
+    this.containerpos = containerpos;
+    this.xbound = containerpos.x + containerWidth - radius;
+    this.ybound = containerpos.y + containerHeight - radius;
     this.context = context;
     this.radius = radius;
+    this.bearing = new Vector(1,1); 
   }
 
   get pos() {
@@ -24,8 +28,25 @@ class Ball {
   }
 
   move() {
-    this.pos.plus()
+    var target = this.pos.plus(this.bearing); 
+    
+    // hits y wall or x wall?
+    if(target.x >= this.xbound || target.x <= (this.containerpos.x+this.radius) || target.y >= this.ybound || target.y <= (this.containerpos.y + this.radius)) {
+      this.bounce(target);
+    } else
+    {
+      this.pos = target;
+    }
 
+  }
+  
+  bounce(impact: Vector) {
+   
+   console.log(impact);
+   var thisang = Math.atan2(impact.x,impact.y); 
+   var newang = randomInRange(0,(2*Math.PI));
+   this.bearing = new Vector(Math.cos(newang),Math.sin(newang));
+   this.move; 
   }
 
   draw() {
@@ -39,12 +60,17 @@ class Ball {
   }
 }
 
+function randomInRange(min: number, max: number) {
+    return Math.random() * (max - min) + min;
+}
 
 function bouncingBall(cx: CanvasRenderingContext2D) {
   var boxPos = new Vector(10, 10);
+  var boxWidth = 300;
+  var boxHeight = 300; 
   var ballPos = new Vector(80, 80);
   var lastTime: number = null;
-  var ball = new Ball(ballPos,cx,20)
+  var ball = new Ball(ballPos,cx,20,boxPos,boxWidth,boxHeight)
   
   function frame(time) {
     if (lastTime != null)
@@ -54,23 +80,19 @@ function bouncingBall(cx: CanvasRenderingContext2D) {
   }
 
   requestAnimationFrame(frame);
-
+  
+  //Draw a rectangle   
+    
   function updateAnimation(step) {
-
+    
     cx.save();
-    cx.clearRect(boxPos.x, boxPos.y, 300, 300);
+    cx.clearRect(boxPos.x, boxPos.y, boxWidth, boxHeight);
     cx.beginPath();
-    cx.rect(boxPos.x, boxPos.y, 300, 300);
+    cx.rect(boxPos.x, boxPos.y, boxWidth, boxHeight);
     cx.stroke();
     cx.closePath();
-    
     ball.move();     
     ball.draw();
   }
-  
-  function move(from: Vector): Vector {
-    var x = Math.round(Math.random());
-    var y = Math.round(Math.random());
-    return from.plus(new Vector(x,y));
-  }
+   
 }

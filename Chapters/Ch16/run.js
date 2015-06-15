@@ -18,12 +18,14 @@ var Vector = (function () {
 })();
 ///<reference path="../Objects/Objects.ts"/>
 var Ball = (function () {
-    function Ball(pos, context, radius) {
+    function Ball(pos, context, radius, containerpos, containerWidth, containerHeight) {
         this._pos = pos;
-        this.xbound = context.canvas.width;
-        this.ybound = context.canvas.height;
+        this.containerpos = containerpos;
+        this.xbound = containerpos.x + containerWidth - radius;
+        this.ybound = containerpos.y + containerHeight - radius;
         this.context = context;
         this.radius = radius;
+        this.bearing = new Vector(1, 1);
     }
     Object.defineProperty(Ball.prototype, "pos", {
         get: function () {
@@ -36,7 +38,21 @@ var Ball = (function () {
         configurable: true
     });
     Ball.prototype.move = function () {
-        this.pos.plus();
+        var target = this.pos.plus(this.bearing);
+        // hits y wall or x wall?
+        if (target.x >= this.xbound || target.x <= (this.containerpos.x + this.radius) || target.y >= this.ybound || target.y <= (this.containerpos.y + this.radius)) {
+            this.bounce(target);
+        }
+        else {
+            this.pos = target;
+        }
+    };
+    Ball.prototype.bounce = function (impact) {
+        console.log(impact);
+        var thisang = Math.atan2(impact.x, impact.y);
+        var newang = randomInRange(0, (2 * Math.PI));
+        this.bearing = new Vector(Math.cos(newang), Math.sin(newang));
+        this.move;
     };
     Ball.prototype.draw = function () {
         this.context.beginPath();
@@ -49,11 +65,16 @@ var Ball = (function () {
     };
     return Ball;
 })();
+function randomInRange(min, max) {
+    return Math.random() * (max - min) + min;
+}
 function bouncingBall(cx) {
     var boxPos = new Vector(10, 10);
+    var boxWidth = 300;
+    var boxHeight = 300;
     var ballPos = new Vector(80, 80);
     var lastTime = null;
-    var ball = new Ball(ballPos, cx, 20);
+    var ball = new Ball(ballPos, cx, 20, boxPos, boxWidth, boxHeight);
     function frame(time) {
         if (lastTime != null)
             updateAnimation(Math.min(100, time - lastTime) / 1000);
@@ -61,20 +82,16 @@ function bouncingBall(cx) {
         requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
+    //Draw a rectangle   
     function updateAnimation(step) {
         cx.save();
-        cx.clearRect(boxPos.x, boxPos.y, 300, 300);
+        cx.clearRect(boxPos.x, boxPos.y, boxWidth, boxHeight);
         cx.beginPath();
-        cx.rect(boxPos.x, boxPos.y, 300, 300);
+        cx.rect(boxPos.x, boxPos.y, boxWidth, boxHeight);
         cx.stroke();
         cx.closePath();
         ball.move();
         ball.draw();
-    }
-    function move(from) {
-        var x = Math.round(Math.random());
-        var y = Math.round(Math.random());
-        return from.plus(new Vector(x, y));
     }
 }
 ///<reference path="../Objects/Objects.ts"/>
