@@ -1,4 +1,6 @@
 ///<reference path="../../Typings/es6-promise.d.ts"/>
+
+/**Wraps XMLHttpGet in a promise */
 function get(url: string, header:string) {
   return new Promise(function(succeed, fail) {
     var req = new XMLHttpRequest();
@@ -17,14 +19,23 @@ function get(url: string, header:string) {
   });
 }
 
-function all<T>(promises: Array<Promise<T>>){
-  return new Promise(function(success, fail) {
-    promises.forEach(function(p){
-      p.then(function(success){
-      
-      }, function(fail) {
-        return fail; 
-      }
-    )})
-  })
+function all(promises: Array<Promise<any>>) {
+  return new Promise(function(succeed, fail) {
+    var results: Array<any> = [];
+    var pending: number = promises.length;
+    
+    promises.forEach(function(promise, i) {
+      promise.then(function(result) {
+        results[i] = result;
+        pending -= 1;
+        if (pending == 0)
+          succeed(results);
+      }, function(error) {
+        fail(error);
+      });
+    });
+    
+    if (promises.length == 0)
+      succeed(results);
+  });
 }

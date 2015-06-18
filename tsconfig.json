@@ -2,9 +2,9 @@
 	"compilerOptions": {
 		"module" : "amd",
 		"target" : "ES6",
-		"out": "./Chapters/Ch17/run.js"
+		"out": "./Chapters/Ch18/run.js"
 	},
 	"files": [
-		"./Chapters/Ch17/test.ts"
+		"./Chapters/Ch18/tests.ts"
 	]
 }
