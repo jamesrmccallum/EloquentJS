@@ -15,5 +15,7 @@ document.addEventListener("DOMContentLoaded", function(evt: Event) {
 	});
 	
 	//Game of life 
-	
+	var gameContainer: HTMLDivElement = <HTMLDivElement> document.querySelector("#gameoflife");
+	var game = new gameOfLife(gameContainer);
+	game.draw();
 });

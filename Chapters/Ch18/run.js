@@ -1,3 +1,22 @@
+var Vector = (function () {
+    function Vector(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+    Vector.prototype.move = function (v) {
+        var x = this.x + v.x;
+        var y = this.y + v.y;
+        return new Vector(x, y);
+    };
+    Vector.prototype.plus = function (other) {
+        return new Vector(this.x + other.x, this.y + other.y);
+    };
+    Vector.prototype.times = function (factor) {
+        return new Vector(this.x * factor, this.y * factor);
+    };
+    return Vector;
+})();
+///<reference path="../Objects/Objects.ts"/>
 function runCode(evt) {
     var codepane = document.querySelector('#code');
     var output = document.querySelector('#output');
@@ -11,6 +30,7 @@ function runCode(evt) {
     }
     output.innerText = result;
 }
+/** takes an input element and an element for completions, reponds to input change **/
 function autoComplete(evt, text, completions) {
     function clear() {
         while (completions.firstChild) {
@@ -39,6 +59,26 @@ function autoComplete(evt, text, completions) {
         completions.appendChild(d);
     }
 }
+var gameOfLife = (function () {
+    function gameOfLife(container) {
+        this.container = container;
+        this.grid = [];
+        for (var i = 0; i < 100; i++) {
+            var c = document.createElement("input");
+            c.type = "checkbox";
+            c.checked = Math.random() >= 0.5 ? true : false;
+            this.grid.push(c);
+        }
+    }
+    /**draws the contents of the grid to the container */
+    gameOfLife.prototype.draw = function () {
+        var _this = this;
+        this.grid.forEach(function (c) {
+            return _this.container.appendChild(c);
+        });
+    };
+    return gameOfLife;
+})();
 ///<reference path="./Ch18.ts"/>
 document.addEventListener("DOMContentLoaded", function (evt) {
     //Javascript workbench 
@@ -50,4 +90,8 @@ document.addEventListener("DOMContentLoaded", function (evt) {
     searchbox.addEventListener("input", function (e) {
         autoComplete(e, searchbox, completions);
     });
+    //Game of life 
+    var gameContainer = document.querySelector("#gameoflife");
+    var game = new gameOfLife(gameContainer);
+    game.draw();
 });

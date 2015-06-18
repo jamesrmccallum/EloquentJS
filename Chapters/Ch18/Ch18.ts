@@ -1,3 +1,4 @@
+///<reference path="../Objects/Objects.ts"/>
 function runCode(evt: MouseEvent) {
 	var codepane: HTMLTextAreaElement = <HTMLTextAreaElement> document.querySelector('#code');
 	var output: HTMLPreElement = <HTMLPreElement> document.querySelector('#output');
@@ -43,5 +44,33 @@ function autoComplete(evt: Event, text: HTMLInputElement, completions: HTMLDivEl
 			clear();
 		});
 		completions.appendChild(d);
+	}
+}
+
+class gameOfLife {
+
+	public grid: Array<HTMLInputElement>;
+	private container: HTMLDivElement;
+
+	constructor(container: HTMLDivElement) {
+		this.container = container; 
+		this.grid = [];
+		
+		for (var i = 0; i < 100; i++) {
+			var c = document.createElement("input");
+			c.type = "checkbox";
+			c.checked = Math.random() >= 0.5 ? true : false;
+			this.grid.push(c);
+		}
+	}
+	/**draws the contents of the grid to the container */
+	draw() {
+		var t: HTMLTableElement = document.createElement('table');
+		this.container.appendChild(t); 
+		
+		this.grid.forEach(c =>
+			this.container.appendChild(c)
+		)
+
 	}
 }
