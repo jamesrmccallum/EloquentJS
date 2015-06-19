@@ -73,6 +73,8 @@ var gameOfLife = (function () {
     /**draws the contents of the grid to the container */
     gameOfLife.prototype.draw = function () {
         var _this = this;
+        var t = document.createElement('table');
+        this.container.appendChild(t);
         this.grid.forEach(function (c) {
             return _this.container.appendChild(c);
         });

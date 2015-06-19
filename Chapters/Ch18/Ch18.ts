@@ -70,7 +70,11 @@ class gameOfLife {
 		
 		this.grid.forEach(c =>
 			this.container.appendChild(c)
-		)
-
+		)	 
 	}
+	/** advances the game one 'turn' - recalculates state */
+	turn() {
+		this.grid.forEach(c=>
+			console.log(c + 'getstate')
+		)}
 }
