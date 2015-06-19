@@ -79,8 +79,40 @@ var gameOfLife = (function () {
             return _this.container.appendChild(c);
         });
     };
+    /** advances the game one 'turn' - recalculates state */
+    gameOfLife.prototype.turn = function () {
+        this.grid.forEach(function (c, i, a) {
+            return c.checked = checksquare(c, i, a);
+        });
+    };
     return gameOfLife;
 })();
+//Any live cell with fewer than two or more than three live neighbors dies.
+//Any live cell with two or three live neighbors lives on to the next generation.
+//Any dead cell with exactly three live neighbors becomes a live cell.
+function checksquare(e, i, a) {
+    var c = e.checked;
+    var checked = [];
+    if (a[i - 1]) {
+        checked.push(true);
+    }
+    if (a[i + 1]) {
+        checked.push(true);
+    }
+    if (a[i + 9]) {
+        checked.push(true);
+    }
+    if (a[i - 9]) {
+        checked.push(true);
+    }
+    if (a[i + 11]) {
+        checked.push(true);
+    }
+    if (a[i - 11]) {
+        checked.push(true);
+    }
+    return checked.length > 3;
+}
 ///<reference path="./Ch18.ts"/>
 document.addEventListener("DOMContentLoaded", function (evt) {
     //Javascript workbench 
@@ -96,4 +128,8 @@ document.addEventListener("DOMContentLoaded", function (evt) {
     var gameContainer = document.querySelector("#gameoflife");
     var game = new gameOfLife(gameContainer);
     game.draw();
+    var gamebtn = document.querySelector("#runGame");
+    gamebtn.addEventListener("click", function () {
+        game.turn();
+    });
 });

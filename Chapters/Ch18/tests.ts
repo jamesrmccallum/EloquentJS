@@ -18,4 +18,9 @@ document.addEventListener("DOMContentLoaded", function(evt: Event) {
 	var gameContainer: HTMLDivElement = <HTMLDivElement> document.querySelector("#gameoflife");
 	var game = new gameOfLife(gameContainer);
 	game.draw();
+	
+	var gamebtn: HTMLButtonElement = <HTMLButtonElement> document.querySelector("#runGame");
+	gamebtn.addEventListener("click",function(){
+		game.turn();
+	});
 });

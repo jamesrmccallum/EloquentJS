@@ -1,4 +1,5 @@
 ///<reference path="../Objects/Objects.ts"/>
+
 function runCode(evt: MouseEvent) {
 	var codepane: HTMLTextAreaElement = <HTMLTextAreaElement> document.querySelector('#code');
 	var output: HTMLPreElement = <HTMLPreElement> document.querySelector('#output');
@@ -74,7 +75,40 @@ class gameOfLife {
 	}
 	/** advances the game one 'turn' - recalculates state */
 	turn() {
-		this.grid.forEach(c=>
-			console.log(c + 'getstate')
+		this.grid.forEach((c,i,a) => 
+			c.checked = checksquare(c,i,a)
 		)}
+}
+//Any live cell with fewer than two or more than three live neighbors dies.
+//Any live cell with two or three live neighbors lives on to the next generation.
+//Any dead cell with exactly three live neighbors becomes a live cell.
+function checksquare(e: HTMLInputElement, i: number,a: Array<HTMLElement>): boolean {
+	var c: boolean = e.checked;
+	var checked: Array<boolean> = [];
+	
+	if (a[i-1]) {
+		checked.push(true)
+	}
+	
+	if(a[i+1]){
+		checked.push(true)
+	}
+	
+	if(a[i+9]){
+		checked.push(true)
+	}
+	
+	if(a[i-9]){
+		checked.push(true)
+	}
+	
+	if(a[i+11]){
+		checked.push(true)
+	}
+	
+	if(a[i-11]){
+		checked.push(true)
+	}
+	
+	return checked.length > 3
 }
