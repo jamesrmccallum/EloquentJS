@@ -73,17 +73,19 @@ var gameOfLife = (function () {
     /**draws the contents of the grid to the container */
     gameOfLife.prototype.draw = function () {
         var _this = this;
-        var t = document.createElement('table');
-        this.container.appendChild(t);
         this.grid.forEach(function (c) {
             return _this.container.appendChild(c);
         });
     };
     /** advances the game one 'turn' - recalculates state */
     gameOfLife.prototype.turn = function () {
+        var tempgrid = [];
         this.grid.forEach(function (c, i, a) {
-            return c.checked = checksquare(c, i, a);
+            var t = document.createElement('input');
+            t.checked = checksquare(c, i, a);
+            tempgrid.push(t);
         });
+        this.grid = tempgrid;
     };
     return gameOfLife;
 })();
@@ -111,7 +113,20 @@ function checksquare(e, i, a) {
     if (a[i - 11]) {
         checked.push(true);
     }
-    return checked.length > 3;
+    if (c) {
+        if (checked.length < 2 || checked.length > 3) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+    else {
+        if (checked.length = 3) {
+            return true;
+        }
+        return false;
+    }
 }
 ///<reference path="./Ch18.ts"/>
 document.addEventListener("DOMContentLoaded", function (evt) {

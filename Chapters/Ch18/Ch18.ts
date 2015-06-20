@@ -65,19 +65,21 @@ class gameOfLife {
 		}
 	}
 	/**draws the contents of the grid to the container */
-	draw() {
-		var t: HTMLTableElement = document.createElement('table');
-		this.container.appendChild(t); 
-		
+	draw() {		
 		this.grid.forEach(c =>
 			this.container.appendChild(c)
 		)	 
 	}
 	/** advances the game one 'turn' - recalculates state */
 	turn() {
-		this.grid.forEach((c,i,a) => 
-			c.checked = checksquare(c,i,a)
-		)}
+		var tempgrid: Array<HTMLInputElement> = [];
+		this.grid.forEach(function(c,i,a) {
+			var t: HTMLInputElement = document.createElement('input');
+			t.checked = checksquare(c,i,a)
+			tempgrid.push(t);
+		})
+		this.grid = tempgrid; 
+	}
 }
 //Any live cell with fewer than two or more than three live neighbors dies.
 //Any live cell with two or three live neighbors lives on to the next generation.
@@ -110,5 +112,17 @@ function checksquare(e: HTMLInputElement, i: number,a: Array<HTMLElement>): bool
 		checked.push(true)
 	}
 	
-	return checked.length > 3
+	if (c) {
+		if (checked.length < 2 || checked.length > 3) {
+			return false;
+		} else {
+			return true;
+		}
+	} else {
+		if (checked.length =3) {
+			return true;
+		}
+		
+		return false;
+	}
 }
