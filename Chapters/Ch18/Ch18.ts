@@ -14,15 +14,15 @@ function runCode(evt: MouseEvent) {
 }
 /** takes an input element and an element for completions, reponds to input change **/
 function autoComplete(evt: Event, text: HTMLInputElement, completions: HTMLDivElement): void {
-	
+
 	function clear() {
 		while (completions.firstChild) {
-	    	completions.removeChild(completions.firstChild);
+			completions.removeChild(completions.firstChild);
 		}
 	}
-	
+
 	clear()
-	
+
 	if (!terms) {
 		var terms: Array<string> = [];
 		for (var name in window) {
@@ -48,16 +48,29 @@ function autoComplete(evt: Event, text: HTMLInputElement, completions: HTMLDivEl
 	}
 }
 
+var directions = {
+	"n": new Vector(0, -1),
+	"ne": new Vector(1, -1),
+	"e": new Vector(1, 0),
+	"se": new Vector(1, 1),
+	"s": new Vector(0, 1),
+	"sw": new Vector(-1, 1),
+	"w": new Vector(-1, 0),
+	"nw": new Vector(-1, -1)
+};
+
 class gameOfLife {
 
 	public grid: Array<HTMLInputElement>;
 	private container: HTMLDivElement;
+	private width: number;
 
-	constructor(container: HTMLDivElement) {
-		this.container = container; 
+	constructor(container: HTMLDivElement, width: number) {
+		this.container = container;
 		this.grid = [];
-		
-		for (var i = 0; i < 100; i++) {
+		this.width = width;
+
+		for (var i = 0; i < (width * width); i++) {
 			var c = document.createElement("input");
 			c.type = "checkbox";
 			c.checked = Math.random() >= 0.5 ? true : false;
@@ -65,64 +78,65 @@ class gameOfLife {
 		}
 	}
 	/**draws the contents of the grid to the container */
-	draw() {		
+	draw() {
+		//Clear
+		while(this.container.firstChild) {
+			this.container.removeChild(this.container.firstChild)
+		}
+		//Draw
 		this.grid.forEach(c =>
 			this.container.appendChild(c)
-		)	 
+			)
 	}
+
+	private get(vec: Vector) {
+		return this.grid[vec.x + this.width * vec.y];
+	};
+	
+	private isInside(vec: Vector) {
+		return vec.x >= 0 && vec.x < this.width &&
+			vec.y >= 0 && vec.y < this.width;
+	};
+	
+	/** Any live cell with fewer than two or more than three live neighbors dies.
+	Any live cell with two or three live neighbors lives on to the next generation.
+	Any dead cell with exactly three live neighbors becomes a live cell.*/
+	private checksquare(sqr: Vector): boolean {
+		var live: boolean = this.get(sqr).checked;
+		console.log(sqr.x + ' ' +sqr.y + ' ' + live);
+		var checked: Array<boolean> = [];
+		var res: boolean = true;
+
+		for (var dir in directions) {
+			var targ: Vector = sqr.plus(directions[dir]);
+			if (this.isInside(targ) && this.get(targ).checked) {
+				checked.push(true);
+			}
+		}
+
+		if (live) {
+			if (checked.length < 2 || checked.length > 3) {res = false;}
+		} else {
+			if (checked.length != 3) {res = false;}
+		}
+		
+		return res; 
+	}
+		
 	/** advances the game one 'turn' - recalculates state */
 	turn() {
 		var tempgrid: Array<HTMLInputElement> = [];
-		this.grid.forEach(function(c,i,a) {
-			var t: HTMLInputElement = document.createElement('input');
-			t.checked = checksquare(c,i,a)
-			tempgrid.push(t);
-		})
-		this.grid = tempgrid; 
-	}
-}
-//Any live cell with fewer than two or more than three live neighbors dies.
-//Any live cell with two or three live neighbors lives on to the next generation.
-//Any dead cell with exactly three live neighbors becomes a live cell.
-function checksquare(e: HTMLInputElement, i: number,a: Array<HTMLElement>): boolean {
-	var c: boolean = e.checked;
-	var checked: Array<boolean> = [];
-	
-	if (a[i-1]) {
-		checked.push(true)
-	}
-	
-	if(a[i+1]){
-		checked.push(true)
-	}
-	
-	if(a[i+9]){
-		checked.push(true)
-	}
-	
-	if(a[i-9]){
-		checked.push(true)
-	}
-	
-	if(a[i+11]){
-		checked.push(true)
-	}
-	
-	if(a[i-11]){
-		checked.push(true)
-	}
-	
-	if (c) {
-		if (checked.length < 2 || checked.length > 3) {
-			return false;
-		} else {
-			return true;
+
+		for (var i = 0; i < this.width; i++) {
+			for (var j = 0; j < this.width; j++) {
+				var sqr: Vector = new Vector(j, i)
+				var t: HTMLInputElement = document.createElement('input');
+				t.type = 'checkbox';
+				t.checked = this.checksquare(sqr);
+				tempgrid.push(t);
+			}
 		}
-	} else {
-		if (checked.length =3) {
-			return true;
-		}
-		
-		return false;
+		this.grid = tempgrid;
+		this.draw();
 	}
 }

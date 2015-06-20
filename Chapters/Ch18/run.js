@@ -59,11 +59,22 @@ function autoComplete(evt, text, completions) {
         completions.appendChild(d);
     }
 }
+var directions = {
+    "n": new Vector(0, -1),
+    "ne": new Vector(1, -1),
+    "e": new Vector(1, 0),
+    "se": new Vector(1, 1),
+    "s": new Vector(0, 1),
+    "sw": new Vector(-1, 1),
+    "w": new Vector(-1, 0),
+    "nw": new Vector(-1, -1)
+};
 var gameOfLife = (function () {
-    function gameOfLife(container) {
+    function gameOfLife(container, width) {
         this.container = container;
         this.grid = [];
-        for (var i = 0; i < 100; i++) {
+        this.width = width;
+        for (var i = 0; i < (width * width); i++) {
             var c = document.createElement("input");
             c.type = "checkbox";
             c.checked = Math.random() >= 0.5 ? true : false;
@@ -73,61 +84,67 @@ var gameOfLife = (function () {
     /**draws the contents of the grid to the container */
     gameOfLife.prototype.draw = function () {
         var _this = this;
+        //Clear
+        while (this.container.firstChild) {
+            this.container.removeChild(this.container.firstChild);
+        }
+        //Draw
         this.grid.forEach(function (c) {
             return _this.container.appendChild(c);
         });
     };
+    gameOfLife.prototype.get = function (vec) {
+        return this.grid[vec.x + this.width * vec.y];
+    };
+    ;
+    gameOfLife.prototype.isInside = function (vec) {
+        return vec.x >= 0 && vec.x < this.width &&
+            vec.y >= 0 && vec.y < this.width;
+    };
+    ;
+    /** Any live cell with fewer than two or more than three live neighbors dies.
+    Any live cell with two or three live neighbors lives on to the next generation.
+    Any dead cell with exactly three live neighbors becomes a live cell.*/
+    gameOfLife.prototype.checksquare = function (sqr) {
+        var live = this.get(sqr).checked;
+        console.log(sqr.x + ' ' + sqr.y + ' ' + live);
+        var checked = [];
+        var res = true;
+        for (var dir in directions) {
+            var targ = sqr.plus(directions[dir]);
+            if (this.isInside(targ) && this.get(targ).checked) {
+                checked.push(true);
+            }
+        }
+        if (live) {
+            if (checked.length < 2 || checked.length > 3) {
+                res = false;
+            }
+        }
+        else {
+            if (checked.length != 3) {
+                res = false;
+            }
+        }
+        return res;
+    };
     /** advances the game one 'turn' - recalculates state */
     gameOfLife.prototype.turn = function () {
         var tempgrid = [];
-        this.grid.forEach(function (c, i, a) {
-            var t = document.createElement('input');
-            t.checked = checksquare(c, i, a);
-            tempgrid.push(t);
-        });
+        for (var i = 0; i < this.width; i++) {
+            for (var j = 0; j < this.width; j++) {
+                var sqr = new Vector(j, i);
+                var t = document.createElement('input');
+                t.type = 'checkbox';
+                t.checked = this.checksquare(sqr);
+                tempgrid.push(t);
+            }
+        }
         this.grid = tempgrid;
+        this.draw();
     };
     return gameOfLife;
 })();
-//Any live cell with fewer than two or more than three live neighbors dies.
-//Any live cell with two or three live neighbors lives on to the next generation.
-//Any dead cell with exactly three live neighbors becomes a live cell.
-function checksquare(e, i, a) {
-    var c = e.checked;
-    var checked = [];
-    if (a[i - 1]) {
-        checked.push(true);
-    }
-    if (a[i + 1]) {
-        checked.push(true);
-    }
-    if (a[i + 9]) {
-        checked.push(true);
-    }
-    if (a[i - 9]) {
-        checked.push(true);
-    }
-    if (a[i + 11]) {
-        checked.push(true);
-    }
-    if (a[i - 11]) {
-        checked.push(true);
-    }
-    if (c) {
-        if (checked.length < 2 || checked.length > 3) {
-            return false;
-        }
-        else {
-            return true;
-        }
-    }
-    else {
-        if (checked.length = 3) {
-            return true;
-        }
-        return false;
-    }
-}
 ///<reference path="./Ch18.ts"/>
 document.addEventListener("DOMContentLoaded", function (evt) {
     //Javascript workbench 
@@ -141,7 +158,7 @@ document.addEventListener("DOMContentLoaded", function (evt) {
     });
     //Game of life 
     var gameContainer = document.querySelector("#gameoflife");
-    var game = new gameOfLife(gameContainer);
+    var game = new gameOfLife(gameContainer, 10);
     game.draw();
     var gamebtn = document.querySelector("#runGame");
     gamebtn.addEventListener("click", function () {
