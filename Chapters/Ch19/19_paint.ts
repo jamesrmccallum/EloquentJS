@@ -1,0 +1,215 @@
+///<reference path="../Objects/Objects.ts"/>
+
+function elt(name: string, attributes?: Object,...args): HTMLElement {
+  var node: HTMLElement = document.createElement(name);
+  if (attributes) {
+    for (var attr in attributes)
+      if (attributes.hasOwnProperty(attr))
+        node.setAttribute(attr, attributes[attr]);
+  }
+  for (var i = 2; i < arguments.length; i++) {
+    var child = arguments[i];
+    if (typeof child == "string")
+      child = document.createTextNode(child);
+    node.appendChild(child);
+  }
+  return node;
+}
+
+var controls = Object.create(null);
+
+function createPaint(parent: HTMLElement) {
+  var canvas: HTMLCanvasElement = <HTMLCanvasElement>elt("canvas", { width: 500, height: 300 });
+  var cx = canvas.getContext("2d");
+  var toolbar = <HTMLDivElement>elt("div", { class: "toolbar" });
+
+  for (var name in controls)
+    toolbar.appendChild(controls[name](cx));
+
+  var panel = elt("div", { class: "picturepanel" }, canvas);
+  parent.appendChild(elt("div", null, panel, toolbar));
+}
+
+interface ITool { [name: string]: Function };
+
+var tools: ITool = Object.create(null);
+
+controls.tool = function(cx: CanvasRenderingContext2D) {
+  var select = <HTMLSelectElement>elt("select");
+  for (var name in tools)
+
+    select.appendChild(elt("option", null, name));
+
+  cx.canvas.addEventListener("mousedown", function(ev: MouseEvent) {
+    if (ev.which == 1) {
+      tools[select.value](ev, cx);
+      event.preventDefault();
+    }
+  });
+
+  return elt("span", null, "Tool: ", select);
+};
+
+function relativePos(event: MouseEvent, element: HTMLCanvasElement): Vector {
+  var rect = element.getBoundingClientRect();
+  return new Vector(Math.floor(event.clientX - rect.left),
+    Math.floor(event.clientY - rect.top));
+}
+
+function trackDrag(onMove, onEnd: Function) {
+  function end(event) {
+    removeEventListener("mousemove", onMove);
+    removeEventListener("mouseup", end);
+    if (onEnd)
+      onEnd(event);
+  }
+  addEventListener("mousemove", onMove);
+  addEventListener("mouseup", end);
+}
+
+tools["Line"] = function(event: MouseEvent, cx: CanvasRenderingContext2D, onEnd: Function) {
+  cx.lineCap = "round";
+
+  var pos = relativePos(event, cx.canvas);
+  trackDrag(function(event) {
+    cx.beginPath();
+    cx.moveTo(pos.x, pos.y);
+    pos = relativePos(event, cx.canvas);
+    cx.lineTo(pos.x, pos.y);
+    cx.stroke();
+  }, onEnd);
+};
+
+tools["erase"] = function(event, cx: CanvasRenderingContext2D) {
+  cx.globalCompositeOperation = "destination-out";
+  tools["Line"](event, cx, function() {
+    cx.globalCompositeOperation = "source-over";
+  });
+};
+
+tools["Text"] = function(event, cx: CanvasRenderingContext2D) {
+  var text: string = prompt("Text:", "");
+
+  if (text) {
+    var pos = relativePos(event, cx.canvas);
+    cx.font = Math.max(7, cx.lineWidth) + "px sans-serif";
+    cx.fillText(text, pos.x, pos.y);
+  }
+};
+
+tools["Spray"] = function(event: MouseEvent, cx: CanvasRenderingContext2D) {
+  var radius: number = cx.lineWidth / 2;
+  var area: number = radius * radius * Math.PI;
+  var dotsPerTick: number = Math.ceil(area / 30);
+  var currentPos: Vector = relativePos(event, cx.canvas);
+  
+  var spray = setInterval(function() {
+    for (var i = 0; i < dotsPerTick; i++) {
+      var offset = randomPointInRadius(radius);
+      cx.fillRect(currentPos.x + offset.x,
+        currentPos.y + offset.y, 1, 1);
+    }
+  }, 25);
+
+  trackDrag(function(event) {
+    currentPos = relativePos(event, cx.canvas);
+  }, function() {
+    clearInterval(spray);
+  });
+};
+
+tools["rectangle"] = function(event: MouseEvent, cx: CanvasRenderingContext2D) {
+  
+}
+
+controls.color = function(cx: CanvasRenderingContext2D) {
+  var input = <HTMLInputElement>elt("input", { type: "color" });
+
+  input.addEventListener("change", function() {
+    cx.fillStyle = input.value;
+    cx.strokeStyle = input.value;
+  });
+  return elt("span", null, "Color: ", input);
+};
+
+controls.brushSize = function(cx: CanvasRenderingContext2D) {
+  var select = <HTMLSelectElement>elt("select");
+  var sizes: Array<number> = [1, 2, 3, 5, 8, 12, 25, 35, 50, 75, 100];
+
+  sizes.forEach(function(size) {
+    select.appendChild(elt("option", { value: size },
+      size + " pixels"));
+  });
+  select.addEventListener("change", function() {
+    cx.lineWidth = parseInt(select.value);
+  });
+  return elt("span", null, "Brush size: ", select);
+};
+
+controls.save = function(cx) {
+  var link = <HTMLLinkElement>elt("a", { href: "/" }, "Save");
+  function update() {
+    try {
+      link.href = cx.canvas.toDataURL();
+    } catch (e) {
+      if (e instanceof Error)
+        link.href = "javascript:alert(" +
+        JSON.stringify("Can't save: " + e.toString()) + ")";
+      else
+        throw e;
+    }
+  }
+  link.addEventListener("mouseover", update);
+  link.addEventListener("focus", update);
+  return link;
+};
+
+
+function loadImageURL(cx: CanvasRenderingContext2D, url: string) {
+  var image = document.createElement("img");
+  image.addEventListener("load", function() {
+    var color = cx.fillStyle, size = cx.lineWidth;
+    cx.canvas.width = image.width;
+    cx.canvas.height = image.height;
+    cx.drawImage(image, 0, 0);
+    cx.fillStyle = color;
+    cx.strokeStyle = color;
+    cx.lineWidth = size;
+  });
+  image.src = url;
+}
+
+controls.openFile = function(cx: CanvasRenderingContext2D) {
+  var input = <HTMLInputElement>elt("input", { type: "file" });
+
+  input.addEventListener("change", function() {
+    if (input.files.length == 0) return;
+    var reader = new FileReader();
+    reader.addEventListener("load", function() {
+      loadImageURL(cx, reader.result);
+    });
+    reader.readAsDataURL(input.files[0]);
+  });
+  return elt("div", null, "Open file: ", input);
+};
+
+controls.openURL = function(cx: CanvasRenderingContext2D): HTMLFormElement {
+  var input = <HTMLInputElement>elt("input", { type: "text" });
+  var form = <HTMLFormElement>elt("form", null,
+    "Open URL: ", input,
+    elt("button", { type: "submit" }, "load"));
+  form.addEventListener("submit", function(event) {
+    event.preventDefault();
+    loadImageURL(cx, input.value);
+  });
+  return form;
+};
+
+function randomPointInRadius(radius: number): Vector {
+  for (; ;) {
+    var x = Math.random() * 2 - 1;
+    var y = Math.random() * 2 - 1;
+    if (x * x + y * y <= 1)
+      return new Vector(x * radius, y * radius);
+  }
+}
