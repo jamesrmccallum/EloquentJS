@@ -11,3 +11,5 @@
 }
 .picturepanel canvas { display: block; }
 .toolbar > * { margin-right: 5px; }
+
+.tempRect{position: absolute; border: 1px solid black};

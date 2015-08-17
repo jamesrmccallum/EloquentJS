@@ -5,6 +5,6 @@
 		"out": "./Chapters/Ch19/run.js"
 	},
 	"files": [
-		"./Chapters/Ch19/19_paint.ts"
+		"./Chapters/Ch19/all.d.ts"
 	]
 }
