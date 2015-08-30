@@ -247,19 +247,57 @@ var Tools;
             }
         },
         floodFill: function (event, cx) {
-            var start = Functions.relativePos(event, cx.canvas);
-            var startcell = cx.getImageData(start.x, start.y, 1, 1);
-            var grid = cx.getImageData(0, 0, cx.canvas.width, cx.canvas.height);
-            var checked = new Array(grid.data.length / 4);
-            function right(v) {
+            //Array of directions 
+            var dirs = { "left": new Objects.Vector(-1, 0),
+                "right": new Objects.Vector(1, 0),
+                "up": new Objects.Vector(0, 1),
+                "down": new Objects.Vector(0, 1)
+            };
+            var pos = Functions.relativePos(event, cx.canvas);
+            var grid = cx.getImageData(0, 0, cx.canvas.width, cx.canvas.height).data;
+            var targetColour = pixelColour(pos);
+            var checked = new Array(grid.length / 4);
+            var maybes = [];
+            //Converts a vector 
+            function getAddress(pos) {
+                return (pos.x + pos.y * cx.canvas.width) * 4;
             }
-            function pixelAddress(px) {
-                var add = (px.x + px.y * cx.canvas.width) * 4;
-                return grid.data[add];
+            //Returns a length 4 Uint8ClampedArray (RGBA) for a given vector
+            function pixelColour(pos) {
+                var t = getAddress(pos);
+                return grid.subarray(t, t + 4);
             }
+            // Look up down left right, record what was seen
+            function scanSurrounding(pos) {
+                for (var d in dirs) {
+                    var chkVector = pos.plus(dirs[d]);
+                    if (compareColour(targetColour, pixelColour(chkVector))) {
+                        console.log(chkVector);
+                        maybes.push(chkVector);
+                        cx.fillRect(chkVector.x, chkVector.y, 1, 1);
+                        checked[pos.x * pos.y] = 1;
+                    }
+                }
+            }
+            //Compares two pixelColours
+            function compareColour(px1, px2) {
+                for (var i = 0; i < px1.length; i++) {
+                    if (px1[i] != px2[i])
+                        return false;
+                }
+                return true;
+            }
+            //Main loop   - L-R-U, L-R-D loop
+            scanSurrounding(pos);
+            for (var i = 0; i < maybes.length; i++) {
+                scanSurrounding(maybes[i]);
+            }
+            //Move
+            //Check + ?colour
+            //Mark results
             //Create a new grid of 15,000 where xy represents the address - store 1's for checked addresses
             // Check will be if newGrid((x*y)==1)
-            console.log(pixelAddress(start));
+            console.log(pixelColour(pos));
         }
     };
 })(Tools || (Tools = {}));
