@@ -3,7 +3,7 @@
 module Tools {
 
   interface ITool { [name: string]: Function };
-
+  
   export var Tools: ITool = {
 
     line: (event: MouseEvent, cx: CanvasRenderingContext2D, onEnd?: EventListener) => {
@@ -109,24 +109,25 @@ module Tools {
         }
       }
     },
-
+    
+    
     floodFill: (event: MouseEvent, cx: CanvasRenderingContext2D) => {
       
       //Array of directions 
       var dirs = {"left": new Objects.Vector(-1,0),
                   "right": new Objects.Vector(1,0),
                   "up": new Objects.Vector(0,1),
-                  "down": new Objects.Vector(0,1)
+                  "down": new Objects.Vector(0,-1)
       };
                        
       var pos = Functions.relativePos(event,cx.canvas);
       var grid = cx.getImageData(0, 0, cx.canvas.width, cx.canvas.height).data;
       var targetColour = pixelColour(pos);
-      var checked = new Array(grid.length/4);
-      var maybes: Array<Objects.Vector> = [];
+      var colored = [];
+      var tocheck = [];
       
-      //Converts a vector 
-      function getAddress(pos: Objects.Vector) {
+      //Converts a vector to an address on the imagedata.data
+      function getAddress (pos: Objects.Vector) {
         return (pos.x + pos.y * cx.canvas.width)*4;
       }
       
@@ -137,23 +138,29 @@ module Tools {
       }
       
       // Look up down left right, record what was seen
-      function scanSurrounding(pos: Objects.Vector) {
+      function fillscan(pos: Objects.Vector) {
+        cx.fillRect(pos.x,pos.y,1,1);
+        colored[pos.x*pos.y] = true;
+        tocheck.shift();
         for (var d in dirs) {
-          var chkVector = pos.plus(dirs[d]);
-          
-          if(compareColour(targetColour,pixelColour(chkVector))) {
-            
-            maybes.push(chkVector);    
-            
-            cx.fillRect(chkVector.x,chkVector.y,1,1);
-            
-            checked[pos.x*pos.y] =1;
+          var chk = pos.plus(dirs[d]);
+          if(!isChecked(chk)) { //If this hasn't already been checked
+            if(isTarget(chk)) { tocheck.push(chk);} 
           }
-          
         }  
       }
       
-     //Compares two pixelColours
+      /** Does the colour of a given cell match the one we're targeting?*/
+      function isTarget(pos: Objects.Vector): boolean {
+        return compareColour(targetColour,pixelColour(pos));
+      }
+      
+      /**  Have we checked this one? */
+      function isChecked(chk: Objects.Vector): boolean {
+        return !colored[chk.x*chk.y]==undefined;
+      }
+      
+     /**  Compares two pixelColours RGBA array */
      function compareColour(px1: Uint8ClampedArray, px2: Uint8ClampedArray): boolean {
        for (var i =0; i<px1.length;i++) {
          if(px1[i] != px2[i]) 
@@ -163,9 +170,9 @@ module Tools {
      }
      
      //Main loop   - L-R-U, L-R-D loop
-     scanSurrounding(pos); 
-     for (var i = 0; i< maybes.length; i++) {
-       scanSurrounding(maybes[i])
+     tocheck.push(pos);
+     while(tocheck) {
+       fillscan(tocheck[0]);
      }
      
      //Move

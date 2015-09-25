@@ -21,10 +21,7 @@ module utilities {
   }
   
   export function charFromElement(element) {
-    if (element == null)
-      return " ";
-    else
-      return element.originChar;
+    return element == null ? " " : element.originChar;
   }
   
   export function dirPlus(dir: string, n: number) {

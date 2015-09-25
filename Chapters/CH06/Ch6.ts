@@ -19,7 +19,7 @@ class TextCell {
 	}
 	
 	minWidth(): number{
-  		return this.text.reduce(function(width: number, line: string) {
+  		return this.text.reduce((width: number, line: string) =>{
     		return Math.max(width, line.length);
 		}, 0);
 	}
@@ -123,17 +123,14 @@ class RangeSeq{
 		this.val = start;
 	}
 	
-	Next(): number {
-		
+	Next(): number {	
 		if (this.val <= this.last) {
 			var v: number = this.val;
 			this.val += 1;
 			return v;
 		} else {
 			this.end = true; 
-		}
-		
-		  
+		}		  
 	}
 	
 	get currIndex(): number {

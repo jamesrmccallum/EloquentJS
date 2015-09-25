@@ -1,8 +1,11 @@
 ///<reference path="creatures.ts"/>
 
+import {Vector} from '../Objects/Objects'
+import {world} from './environment'
+
 var actionTypes: { [id: string] : Function; } = {};
 
-actionTypes["grow"] = function(critter: creature) {
+actionTypes["grow"] = (critter: creature)=> {
   critter.energy += 0.5;
   return true;
   }

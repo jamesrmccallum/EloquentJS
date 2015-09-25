@@ -251,14 +251,14 @@ var Tools;
             var dirs = { "left": new Objects.Vector(-1, 0),
                 "right": new Objects.Vector(1, 0),
                 "up": new Objects.Vector(0, 1),
-                "down": new Objects.Vector(0, 1)
+                "down": new Objects.Vector(0, -1)
             };
             var pos = Functions.relativePos(event, cx.canvas);
             var grid = cx.getImageData(0, 0, cx.canvas.width, cx.canvas.height).data;
             var targetColour = pixelColour(pos);
-            var checked = new Array(grid.length / 4);
-            var maybes = [];
-            //Converts a vector 
+            var colored = [];
+            var tocheck = [];
+            //Converts a vector to an address on the imagedata.data
             function getAddress(pos) {
                 return (pos.x + pos.y * cx.canvas.width) * 4;
             }
@@ -268,18 +268,28 @@ var Tools;
                 return grid.subarray(t, t + 4);
             }
             // Look up down left right, record what was seen
-            function scanSurrounding(pos) {
+            function fillscan(pos) {
+                cx.fillRect(pos.x, pos.y, 1, 1);
+                colored[pos.x * pos.y] = true;
+                tocheck.shift();
                 for (var d in dirs) {
-                    var chkVector = pos.plus(dirs[d]);
-                    if (compareColour(targetColour, pixelColour(chkVector))) {
-                        console.log(chkVector);
-                        maybes.push(chkVector);
-                        cx.fillRect(chkVector.x, chkVector.y, 1, 1);
-                        checked[pos.x * pos.y] = 1;
+                    var chk = pos.plus(dirs[d]);
+                    if (!isChecked(chk)) {
+                        if (isTarget(chk)) {
+                            tocheck.push(chk);
+                        }
                     }
                 }
             }
-            //Compares two pixelColours
+            //Does the colour of a given cell match the one we're targeting
+            function isTarget(pos) {
+                return compareColour(targetColour, pixelColour(pos));
+            }
+            //Have we checked this one?
+            function isChecked(chk) {
+                return !colored[chk.x * chk.y] == undefined;
+            }
+            //Compares two pixelColours RGBA array
             function compareColour(px1, px2) {
                 for (var i = 0; i < px1.length; i++) {
                     if (px1[i] != px2[i])
@@ -288,9 +298,9 @@ var Tools;
                 return true;
             }
             //Main loop   - L-R-U, L-R-D loop
-            scanSurrounding(pos);
-            for (var i = 0; i < maybes.length; i++) {
-                scanSurrounding(maybes[i]);
+            tocheck.push(pos);
+            while (tocheck) {
+                fillscan(tocheck[0]);
             }
             //Move
             //Check + ?colour

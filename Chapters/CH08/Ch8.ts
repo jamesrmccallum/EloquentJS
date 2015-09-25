@@ -2,16 +2,16 @@
 //RELIABLE MULTIPLICATION 
 
 interface Error {
-  stack: string; 
+  stack: string;
 }
 
 class MultiplicatorUnitFailure implements Error {
-  proto: Error; 
-  message: string; 
-  stack: string; 
-  name: string; 
-  
-  constructor(message? :string){
+  proto: Error;
+  message: string;
+  stack: string;
+  name: string;
+
+  constructor(message?: string) {
     this.name = "MultiplicatorUnitFailure";
     this.message = message;
     this.stack = (new Error().stack);
@@ -27,20 +27,20 @@ function primitiveMultiply(a, b) {
 }
 
 function reliableMultiply(a, b): number {
-  for(;;) {
+  for (; ;) {
     try {
-  	 var result: number = primitiveMultiply(a,b);
-     return result;
-     break; 
+      var result: number = primitiveMultiply(a, b);
+      return result;
+      break;
     } catch (e) {
-      if (e instanceof MultiplicatorUnitFailure) 
+      if (e instanceof MultiplicatorUnitFailure)
         console.log(e.stack);
-        console.log("bad number.. retrying");
+      console.log("bad number.. retrying");
     }
-  }	  
+  }
 }
 
-   
+
 
 console.log(reliableMultiply(8, 8));
 // → 64
@@ -48,24 +48,24 @@ console.log(reliableMultiply(8, 8));
 //THE LOCKED BOX 
 
 class Box {
+
   public locked: boolean;
-  private _content: Array<any>;
-  
+  private _content: Array<any>
   constructor() {
     this.locked = true;
-    this._content = []; 
+    this._content = [];
   }
-  
+
   unlock() { this.locked = false; }
-  lock() { this.locked = true;  }
-  
+  lock() { this.locked = true; }
+
   get content() {
     if (this.locked) throw new Error("Locked!");
     return this._content;
   }
 };
 
-var box= new Box();
+var box = new Box();
 box.unlock();
 
 function withBoxUnlocked(body: Function) {
@@ -73,25 +73,25 @@ function withBoxUnlocked(body: Function) {
   //If the box is unlocked we enter and exit without operating on lock 
   //if locked, we unlock and relock it 
   
-  var locked: boolean = false; 
-  
-  try{ //Lock test 
-    var v: any = box.content; 
-  } catch (e) { 
-    locked = true; 
-    box.unlock();  
+  var locked: boolean = false;
+
+  try { //Lock test 
+    var v: any = box.content;
+  } catch (e) {
+    locked = true;
+    box.unlock();
   }
-  
+
   try {
     body();
-  } 
+  }
   catch (e) {
     throw e;
   }
   finally {
-    if(locked) box.lock(); 
+    if (locked) box.lock();
   }
-  
+
 }
 
 withBoxUnlocked(function() {

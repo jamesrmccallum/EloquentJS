@@ -13,7 +13,7 @@ class creature {
   public act: Function;
   public energy: number;
   public direction: string;
-  public preySeen: Array<any>
+  public preySeen: Array<any>;
   public originChar: string;
    
   constructor(public spec: Creaturespec, originChar: string) {
