@@ -1,8 +1,6 @@
-///<reference path = "./all.d.ts" />
-
 import {Vector, IVector} from '../Objects/Objects';
 import {Creature, createCreature} from './creatures';
-import {world} from './launch'
+import {world} from 'index'
 
 export interface IAction {
   type: string;

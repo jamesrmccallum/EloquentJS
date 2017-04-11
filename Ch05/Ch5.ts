@@ -40,7 +40,7 @@ var ANCESTRY_FILE: string = "[\n  " + [
     '{"name": "Jacobus Bernardus van Brussel", "sex": "m", "born": 1736, "died": 1809, "father": "Jan van Brussel", "mother": "Elisabeth Haverbeke"}'
 ].join(",\n  ") + "\n]";
 
-interface Ancestor {
+type Ancestor = {
     name: string;
     sex: string;
     born: number;
@@ -100,9 +100,9 @@ function flattener(inArray: number[][]): number[] {
 
 console.log(flattener(arrays));
 
-var ancestry: Ancestor[] = JSON.parse(ANCESTRY_FILE);
-
 // FIND AVERAGE MOTHER DAUGHTER AGES 
+
+var ancestry: Ancestor[] = JSON.parse(ANCESTRY_FILE);
 
 interface nameArray {[name:string]:Ancestor};
 
@@ -205,7 +205,7 @@ function every(a: Array<any>, f: Function): boolean {
     return res;
 }
 
-function some(a: Array<any>, f: Function): boolean {
+function some<T>(a: Array<T>, f: Function): boolean {
     var res: boolean = false;
     var i: number = 0;
 
@@ -223,5 +223,3 @@ console.log(every([NaN, NaN, NaN], isNaN));
 console.log(every([NaN, NaN, 4], isNaN));
 console.log(some([NaN, 3, 4], isNaN));
 console.log(some([2, 3, 4], isNaN));
-
-console.log("inspect");

@@ -1,6 +1,6 @@
-import {View, directionNames} from './Environment';
-import {IAction} from './actionTypes';
-import {randomElement,charFromElement,dirPlus} from './Utilities';
+import {View, directionNames} from 'environment';
+import {IAction} from 'actionTypes';
+import {randomElement,charFromElement,dirPlus} from 'utilities';
 
 export interface ICreaturespec {
   energy: number;
@@ -51,9 +51,10 @@ specs["PlantEater"] = {
   direction: "",
   act: (v)=> {
     let space = v.find(" ");
+    var plant = v.find("*");
+
     if (this.energy > 60 && space)
       return { type: "reproduce", direction: space };
-    var plant = v.find("*");
     if (plant)
       return { type: "eat", direction: plant };
     if (space)
@@ -112,6 +113,7 @@ specs["SmartPlantEater"] = {
 
     if (plants.length > 1)
       return { type: "eat", direction: randomElement(plants) };
+
     if (v.look(this.direction) != null && space)
       this.direction = space;
     return { type: "move", direction: this.direction };

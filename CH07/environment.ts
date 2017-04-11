@@ -1,9 +1,7 @@
-///<reference path = "./all.d.ts" />
-
-import {Vector} from '../Objects/Objects';
-import {Creature, createCreature} from './Creatures';
-import {IAction, actionTypes} from './actionTypes';
-import {randomElement} from './Utilities';
+import { Vector } from '../Objects/Objects';
+import { Creature, createCreature } from 'creatures';
+import { IAction, actionTypes } from 'actionTypes';
+import { randomElement } from 'utilities';
 
 var directions: Object = {
   "n": new Vector(0, -1),
@@ -27,7 +25,7 @@ export class World {
   constructor(map: string[], public legend: ILegend) {
     var grid = new Grid(map[0].length, map.length);
     this.grid = grid;
-    
+
     //Load the grid 
     map.forEach((line: string, y) => {
       for (var x = 0; x < line.length; x++)
@@ -35,7 +33,7 @@ export class World {
           createCreature(legend, line[x]));
     });
   }
-  
+
   // Let each creature 'act' in turn 
   turn() {
     var acted = [];
@@ -61,7 +59,7 @@ export class World {
         this.grid.set(vector, null);
     }
   }
-  
+
   //Is the requested direction inside the grid? 
   checkDestination(action: IAction, vector: Vector) {
     if (directions.hasOwnProperty(action.direction)) {
@@ -135,7 +133,7 @@ export class View {
   }
 
   findAll(ch: string) {
-    let found: Creature[] = [];
+    let found: string[] = [];
     for (let dir in directions) {
       let f: Creature = this.look(dir);
       if ((f == null ? ' ' : f.originChar) == ch) {

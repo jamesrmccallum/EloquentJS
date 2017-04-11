@@ -1,9 +1,10 @@
 {
 	"compilerOptions": {
+		"module": "amd",
 		"target" : "es5",
 		"out": "./elife_main.js"
 	},
 	"files": [
-		"./all.d.ts"
+		"./index.ts"
 	]
 }

@@ -1,6 +1,4 @@
-///<reference path = "./all.d.ts" />
-
-import {directionNames} from './Environment';
+import {directionNames} from 'environment';
 
 export function randomElement(array: Array<any>) {
   return array[Math.floor(Math.random() * array.length)];

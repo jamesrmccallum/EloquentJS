@@ -1,4 +1,4 @@
-import {World} from './Environment';
+import {World} from 'environment';
 
 var plan: string[] =      ["####################################################",
                            "#                 ####         ****              ###",
@@ -40,8 +40,7 @@ class Animated {
     this.pre = <HTMLPreElement>node.appendChild(doc.createElement("pre"));
     this.pre.appendChild(doc.createTextNode(this.world.toString()));
     this.button = <HTMLDivElement>node.appendChild(doc.createElement("div"));
-    this.button.style.cssText = "position: absolute; bottom: 8px; right: -4.5em; color: white; font-family: tahoma, arial; " +
-    "background: #4ab; cursor: pointer; border-radius: 18px; font-size: 70%; width: 3.5em; text-align: center;";
+    this.button.style.cssText = "position: absolute; bottom: 8px; right: -4.5em; color: white; font-family: tahoma, arial; background: #4ab; cursor: pointer; border-radius: 18px; font-size: 70%; width: 3.5em; text-align: center;";
     this.button.innerHTML = "stop";
     this.button.addEventListener("click", () => { self.clicked(); });
     this.disabled = false;
