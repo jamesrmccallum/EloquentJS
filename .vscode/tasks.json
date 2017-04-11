@@ -15,7 +15,7 @@
 	"windows": {
 		"command": "tsc"
 	},
-	"showOutput": "silent",
+	"showOutput": "always",
 	"args": [],
 	"problemMatcher": "$tsc"
 }

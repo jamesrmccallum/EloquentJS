@@ -1,0 +1,11 @@
+{
+	"compilerOptions": {
+		"target": "ES5",
+		"module": "commonjs",
+		"out": "./main.js"
+	},
+	"files": [
+		"./11_language.ts",
+		"tests.ts"
+	]
+}
